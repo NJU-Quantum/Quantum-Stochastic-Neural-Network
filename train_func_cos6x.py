@@ -24,11 +24,7 @@ def main():
     steps = 1000  
     for it in range(steps):
         opt.zero_grad()
-        yhat_list = []
-        for x in x_train:
-            yhat, _ = model(x)
-            yhat_list.append(yhat)
-        yhat = torch.stack(yhat_list)
+        yhat, _ = model(x_train)
         loss = torch.mean((yhat - y_train) ** 2)
         loss.backward()
         opt.step()
@@ -40,7 +36,8 @@ def main():
     # plot
     with torch.no_grad():
         xs = torch.linspace(0.3, 1.3, 300, device=device)
-        yh = torch.stack([model(x)[0] for x in xs]).cpu().numpy()
+        yh, _ = model(xs)
+        yh = yh.cpu().numpy()
         yt = target(xs).cpu().numpy()
 
     plt.figure(figsize=(10,4))

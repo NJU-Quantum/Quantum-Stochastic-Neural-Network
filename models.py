@@ -3,7 +3,9 @@ import torch
 import torch.nn as nn
 import qsw # liouvillian, lindblad_rhs, liouvillian_mv, evolve_expm, evolve_vec_rk4, evolve_from_operators
 
-evolve = qsw.evolve_expm # 默认使用方法
+# 默认使用自适应演化器：小规模用 expm，大规模自动切换 Krylov
+# 如需固定算法，可在脚本中临时覆盖 models.evolve。
+evolve = qsw.evolve_auto
 
 
 class QSNNFunction(nn.Module):
@@ -20,13 +22,17 @@ class QSNNFunction(nn.Module):
         """
         Eq.(7) with n=1: |psi> ∝ Σ_{i=0}^{N_in-1} x^i |i>
         """
-        x = x.to(self.device) # x is a scalar
-        powers = torch.stack([x**i for i in range(self.N_in)], dim=0)  # (N_in,)
-        powers = powers.squeeze(-1)  # 确保是 (N_in,) 形状
-        psi = torch.zeros((self.N, 1), device=self.device, dtype=torch.complex64)
-        psi[:self.N_in, 0] = powers.to(torch.complex64)
-        psi = psi / torch.linalg.norm(psi) # normalize
-        rho = psi @ psi.mH # density matrix
+        x = x.to(self.device)
+        x = x.reshape(-1)  # (B,)
+        B = x.shape[0]
+
+        exponents = torch.arange(self.N_in, device=self.device, dtype=x.dtype)
+        powers = x.unsqueeze(-1) ** exponents.unsqueeze(0)  # (B, N_in)
+
+        psi = torch.zeros((B, self.N, 1), device=self.device, dtype=torch.complex64)
+        psi[:, :self.N_in, 0] = powers.to(torch.complex64)
+        psi = psi / torch.linalg.norm(psi, dim=1, keepdim=True).clamp_min(1e-12)
+        rho = psi @ psi.mH  # (B, N, N)
         return rho
 
     def forward(self, x):
@@ -36,7 +42,9 @@ class QSNNFunction(nn.Module):
         rho_in = self.encode(x)
         rho_out = evolve(rho_in, H, [], self.T)
 
-        yhat = rho_out[self.N-1, self.N-1].real.clamp(0.0, 1.0)
+        yhat = rho_out[:, self.N-1, self.N-1].real.clamp(0.0, 1.0)
+        if yhat.numel() == 1:
+            return yhat[0], rho_out[0]
         return yhat, rho_out
     
 
@@ -63,16 +71,25 @@ class QSNN2D(nn.Module):
         K = self.N_in // 2
         assert 2*K == self.N_in
 
-        psi = torch.zeros((self.N,1), device=self.device, dtype=torch.complex64)
-        xs = torch.stack([x, y]).to(self.device)
-        for d in range(2):
-            for i in range(K):
-                psi[d*K + i, 0] = (xs[d] ** i).to(torch.complex64)
-        psi = psi / torch.linalg.norm(psi)
+        x = x.to(self.device).reshape(-1)
+        y = y.to(self.device).reshape(-1)
+        B = x.shape[0]
+
+        exponents = torch.arange(K, device=self.device, dtype=x.dtype)
+        px = x.unsqueeze(-1) ** exponents.unsqueeze(0)
+        py = y.unsqueeze(-1) ** exponents.unsqueeze(0)
+
+        psi = torch.zeros((B, self.N, 1), device=self.device, dtype=torch.complex64)
+        psi[:, :K, 0] = px.to(torch.complex64)
+        psi[:, K:2*K, 0] = py.to(torch.complex64)
+        psi = psi / torch.linalg.norm(psi, dim=1, keepdim=True).clamp_min(1e-12)
         return psi @ psi.mH
 
     def forward(self, xy):
-        x, y = xy[0], xy[1]
+        if isinstance(xy, (list, tuple)):
+            x, y = xy[0], xy[1]
+        else:
+            x, y = xy[..., 0], xy[..., 1]
         N, N_in = self.N, self.N_in
 
         # Stage 1: unitary on input block
@@ -94,8 +111,10 @@ class QSNN2D(nn.Module):
 
         rho_out = evolve(rho_u, H, Ls, self.T_d)
 
-        p0 = rho_out[out0, out0].real
-        p1 = rho_out[out1, out1].real
-        probs = torch.stack([p0, p1]).clamp(1e-6, 1.0)
-        probs = probs / probs.sum()  # normalize
+        p0 = rho_out[:, out0, out0].real
+        p1 = rho_out[:, out1, out1].real
+        probs = torch.stack([p0, p1], dim=-1).clamp(1e-6, 1.0)
+        probs = probs / probs.sum(dim=-1, keepdim=True)  # normalize
+        if probs.shape[0] == 1:
+            return probs[0], rho_out[0]
         return probs, rho_out

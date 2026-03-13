@@ -1,0 +1,15 @@
+{
+  "chat.tools.global.autoApprove": true,
+  "chat.tools.autoApprove": true,
+  "chat.tools.terminal.enableAutoApprove": true,
+  "chat.tools.terminal.ignoreDefaultAutoApproveRules": true,
+  "chat.tools.terminal.blockDetectedFileWrites": "never",
+  "chat.tools.terminal.autoApprove": {
+    "/.*/": true,
+    "matchCommandLine": true
+  },
+  "chat.tools.edits.autoApprove": {
+    "**/*": true
+  },
+  "chat.editing.autoAccept": 0
+}

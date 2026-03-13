@@ -61,8 +61,15 @@ def lindblad_rhs(rho, H, Ls): # 计算Liouvillian演化的右侧，即drho/dt
 def evolve_expm(rho0, H, Ls, T):
     L = liouvillian(H, Ls)
     U = torch.matrix_exp(L * T) # 显式构造 Liouvillian 的指数矩阵，适用于小系统（N不大）, 低效
-    vT = U @ vec(rho0)
-    return unvec(vT, rho0.shape[0])
+    if rho0.dim() == 2:
+        vT = U @ vec(rho0)
+        return unvec(vT, rho0.shape[0])
+
+    # batched rho0: (B, N, N)
+    B, N, _ = rho0.shape
+    v0 = rho0.transpose(-1, -2).reshape(B, N * N).T.contiguous()  # (N^2, B)
+    vT = U @ v0
+    return vT.T.reshape(B, N, N).transpose(-1, -2).contiguous()
 
 def evolve_vec_rk4(rho0, H, Ls, T, steps=100): # 直接在密度矩阵空间使用RK4方法数值求解Liouvillian演化
     rho = rho0.clone()
@@ -175,12 +182,56 @@ def evolve_from_operators(rho0, H, Ls, T, krylov_dim=20, steps=10, tol=1e-8):
         不显式构造 Liouvillian
         直接近似 exp(L*T) @ vec(rho0)
     """
-    v = vec(rho0)
-    dt = T / steps
-    A_mv = liouvillian_mv(H, Ls)
+    if rho0.dim() == 2:
+        v = vec(rho0)
+        dt = T / steps
+        A_mv = liouvillian_mv(H, Ls)
 
-    for _ in range(steps):
-        v = _krylov_expm_multiply(A_mv, v, dt, m=krylov_dim, tol=tol)
+        for _ in range(steps):
+            v = _krylov_expm_multiply(A_mv, v, dt, m=krylov_dim, tol=tol)
 
-    return unvec(v, rho0.shape[0])
+        return unvec(v, rho0.shape[0])
+
+    # batched rho0: (B, N, N)
+    outs = [
+        evolve_from_operators(rho0[b], H, Ls, T, krylov_dim=krylov_dim, steps=steps, tol=tol)
+        for b in range(rho0.shape[0])
+    ]
+    return torch.stack(outs, dim=0)
+
+
+def evolve_auto(
+    rho0,
+    H,
+    Ls,
+    T,
+    dense_cutoff_cpu=28,
+    dense_cutoff_cuda=24,
+    krylov_dim=20,
+    steps=10,
+    tol=1e-8,
+):
+    """
+    自适应演化接口：
+    - 小规模系统：使用显式 expm（通常更快）
+    - 较大规模系统：使用 Krylov expm_multiply（避免显式 Liouvillian 指数）
+    """
+    N = H.shape[0]
+    if H.device.type == "cuda":
+        use_dense = N <= dense_cutoff_cuda
+    else:
+        use_dense = N <= dense_cutoff_cpu
+
+    if use_dense:
+        return evolve_expm(rho0, H, Ls, T)
+
+    return evolve_from_operators(
+        rho0,
+        H,
+        Ls,
+        T,
+        krylov_dim=krylov_dim,
+        steps=steps,
+        tol=tol,
+    )
 

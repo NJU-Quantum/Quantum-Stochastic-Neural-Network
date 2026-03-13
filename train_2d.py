@@ -12,11 +12,11 @@ def plot_boundary(model, X, y, title=""):
     gx = torch.linspace(0, 1, 20)
     gy = torch.linspace(0, 1, 20)
     zz = torch.zeros((len(gy), len(gx)))
+    grid_points = torch.stack(torch.meshgrid(gx, gy, indexing="xy"), dim=-1).reshape(-1, 2).to(device)
     with torch.no_grad():
-        for iy, yy in enumerate(gy):
-            for ix, xx in enumerate(gx):
-                p, _ = model(torch.tensor([xx, yy], device=device))
-                zz[iy, ix] = torch.argmax(p).cpu()
+        p, _ = model(grid_points)
+        pred = torch.argmax(p, dim=1).cpu().reshape(len(gy), len(gx))
+        zz[:, :] = pred
     plt.imshow(zz.numpy(), origin="lower", extent=(0,1,0,1), alpha=0.35, cmap="coolwarm")
 
     Xn = X.numpy()
@@ -46,11 +46,8 @@ def main():
     losses = []
     for it in range(steps):
         opt.zero_grad()
-        loss = 0.0
-        for i in range(Xd.shape[0]):
-            probs, _ = model(Xd[i])
-            loss = loss + (1.0 - probs[yd[i]])
-        loss = loss / Xd.shape[0]
+        probs, _ = model(Xd)
+        loss = (1.0 - probs[torch.arange(Xd.shape[0], device=device), yd]).mean()
         loss.backward()
         opt.step()
 

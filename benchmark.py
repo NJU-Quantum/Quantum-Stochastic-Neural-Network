@@ -5,13 +5,13 @@ import qsw
 
 # 定义要对比的演化函数
 evolve_methods = {
+    'auto': qsw.evolve_auto,
     'expm': qsw.evolve_expm,
     'rk4': qsw.evolve_vec_rk4,
     'krylov': qsw.evolve_from_operators
 }
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-device = "cuda"
 
 def benchmark_qsnn_function(N_in=20, T=1.0, num_runs=10):
     results = {}

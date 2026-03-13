@@ -54,12 +54,13 @@ def basis(N, i, device):
     return v
 
 class QSNN2D(nn.Module):
-    def __init__(self, N_in=12, T_u=1.0, T_d=1.0, init_h=0.1, init_g=0.1, device="cuda"):
+    def __init__(self, N_in=12, T_u=1.0, T_d=1.0, init_h=0.1, init_g=0.1, device="cuda", stage2_steps=20):
         super().__init__()
         self.N_in = N_in
         self.N = N_in + 2
         self.T_u, self.T_d = T_u, T_d
         self.device = device
+        self.stage2_steps = stage2_steps
 
         # input-layer Hamiltonian params
         self.Hu_raw = nn.Parameter(init_h * torch.randn(N_in, N_in, device=device, dtype=torch.float32))
@@ -101,15 +102,17 @@ class QSNN2D(nn.Module):
         rho0 = self.encode(x, y)
         rho_u = evolve(rho0, H, [], self.T_u)
 
-        # Stage 2: dissipative input -> output
-        out0, out1 = N_in, N_in + 1
-        Ls = []
-        for j in range(N_in):
-            braj = basis(N, j, self.device).mH
-            Ls.append(self.gamma[0,j].to(torch.complex64) * (basis(N,out0,self.device) @ braj))
-            Ls.append(self.gamma[1,j].to(torch.complex64) * (basis(N,out1,self.device) @ braj))
+        # Stage 2: dissipative input -> output（结构化演化器，适配大 N）
+        rho_out = qsw.evolve_qsnn2d_stage2_structured(
+            rho_u,
+            H,
+            self.gamma.to(torch.complex64),
+            self.T_d,
+            N_in,
+            steps=self.stage2_steps,
+        )
 
-        rho_out = evolve(rho_u, H, Ls, self.T_d)
+        out0, out1 = N_in, N_in + 1
 
         p0 = rho_out[:, out0, out0].real
         p1 = rho_out[:, out1, out1].real

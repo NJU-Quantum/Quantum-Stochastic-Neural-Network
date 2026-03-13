@@ -71,6 +71,20 @@ def evolve_expm(rho0, H, Ls, T):
     vT = U @ v0
     return vT.T.reshape(B, N, N).transpose(-1, -2).contiguous()
 
+
+def evolve_unitary(rho0, H, T):
+    """
+    仅幺正演化（Ls 为空时的高效路径）：
+        rho(T) = U rho(0) U^†, U = exp(-i H T)
+    """
+    U = torch.matrix_exp((-1j) * H * T)
+    Udag = U.mH
+
+    if rho0.dim() == 2:
+        return U @ rho0 @ Udag
+
+    return U.unsqueeze(0) @ rho0 @ Udag.unsqueeze(0)
+
 def evolve_vec_rk4(rho0, H, Ls, T, steps=100): # 直接在密度矩阵空间使用RK4方法数值求解Liouvillian演化
     rho = rho0.clone()
     dt = T / steps
@@ -207,6 +221,7 @@ def evolve_auto(
     T,
     dense_cutoff_cpu=28,
     dense_cutoff_cuda=24,
+    dense_cutoff_cuda_batched=40,
     krylov_dim=20,
     steps=10,
     tol=1e-8,
@@ -216,9 +231,14 @@ def evolve_auto(
     - 小规模系统：使用显式 expm（通常更快）
     - 较大规模系统：使用 Krylov expm_multiply（避免显式 Liouvillian 指数）
     """
+    if len(Ls) == 0:
+        return evolve_unitary(rho0, H, T)
+
     N = H.shape[0]
+    is_batched = rho0.dim() == 3 and rho0.shape[0] > 1
     if H.device.type == "cuda":
-        use_dense = N <= dense_cutoff_cuda
+        cutoff = dense_cutoff_cuda_batched if is_batched else dense_cutoff_cuda
+        use_dense = N <= cutoff
     else:
         use_dense = N <= dense_cutoff_cpu
 
@@ -234,4 +254,65 @@ def evolve_auto(
         steps=steps,
         tol=tol,
     )
+
+
+def _lindblad_rhs_qsnn2d_structured(rho, H, gamma, N_in):
+    """
+    QSNN2D 第二阶段专用 RHS（结构化耗散）：
+    L_{o,j} = gamma[o,j] |o><j|, o in {N_in, N_in+1}, j in [0, N_in)
+
+    使用结构公式避免构造 L 列表与大规模矩阵乘法。
+    """
+    N = H.shape[0]
+    out0, out1 = N_in, N_in + 1
+
+    if rho.dim() == 2:
+        rho = rho.unsqueeze(0)
+        squeeze_back = True
+    else:
+        squeeze_back = False
+
+    # coherent part
+    drho = -1j * (H.unsqueeze(0) @ rho - rho @ H.unsqueeze(0))
+
+    # dissipative damping coefficients on input nodes
+    gabs2 = gamma.abs() ** 2  # (2, N_in)
+    damp_in = gabs2.sum(dim=0)  # (N_in,)
+    damp_full = torch.zeros((N,), device=H.device, dtype=H.dtype)
+    damp_full[:N_in] = damp_in.to(H.dtype)
+
+    # -1/2 {D, rho}, where D = diag(damp_full)
+    drho = drho - 0.5 * (
+        damp_full.view(1, N, 1) * rho + rho * damp_full.view(1, 1, N)
+    )
+
+    # jump terms: only contribute to output diagonal
+    rho_in_diag = torch.diagonal(rho[:, :N_in, :N_in], dim1=-2, dim2=-1)  # (B, N_in)
+    gain0 = (rho_in_diag * gabs2[0].to(rho.dtype).view(1, N_in)).sum(dim=1)
+    gain1 = (rho_in_diag * gabs2[1].to(rho.dtype).view(1, N_in)).sum(dim=1)
+
+    drho[:, out0, out0] = drho[:, out0, out0] + gain0
+    drho[:, out1, out1] = drho[:, out1, out1] + gain1
+
+    if squeeze_back:
+        return drho[0]
+    return drho
+
+
+def evolve_qsnn2d_stage2_structured(rho0, H, gamma, T, N_in, steps=20):
+    """
+    QSNN2D 第二阶段专用演化器：结构化 Lindblad + RK4
+    用于大 N（如 N≈100）场景，避免显式 Liouvillian 或逐样本 Krylov 退化。
+    """
+    rho = rho0.clone()
+    dt = T / steps
+
+    for _ in range(steps):
+        k1 = _lindblad_rhs_qsnn2d_structured(rho, H, gamma, N_in)
+        k2 = _lindblad_rhs_qsnn2d_structured(rho + 0.5 * dt * k1, H, gamma, N_in)
+        k3 = _lindblad_rhs_qsnn2d_structured(rho + 0.5 * dt * k2, H, gamma, N_in)
+        k4 = _lindblad_rhs_qsnn2d_structured(rho + dt * k3, H, gamma, N_in)
+        rho = rho + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+    return rho
 

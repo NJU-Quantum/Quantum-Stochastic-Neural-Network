@@ -1,4 +1,4 @@
 *.pdf
 *.pptx
 __pycache__/
-ga_framework/
+ga_framework

@@ -1,0 +1,6 @@
+Summary (final loss):
+N=100  final_loss=0.068877
+N=200  final_loss=0.077521
+N=300  final_loss=0.073601
+N=400  final_loss=0.064944
+N=500  final_loss=0.054922

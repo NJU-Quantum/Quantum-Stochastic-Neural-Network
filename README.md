@@ -21,16 +21,16 @@
 - 模型定义： models.py  
   - `QSNNFunction`（函数拟合）  
   - `QSNN2D`（二维分类）
+  - `QSNNText`（诗句/句子识别）
 - 数据生成： data.py  
   - `make_circles`、`make_moons` 等 2D 数据。
-- 训练脚本：  
-  - train_func_cos6x.py（回归任务）  
-  - train_2d.py（分类任务）
-- 性能对比： benchmark.py  
-  - 对比不同演化器前向/反向开销。
-- 说明文档： notes.md
-- 历史脚本： QSNN.py, QSNN 可视化.py
-- 空壳文件： plot.py, model2.py
+- 任务脚本分层目录： tasks/  
+  - `tasks/function_regression/train_func_cos6x.py`（回归任务）  
+  - `tasks/two_d_classification/train_2d.py`（分类任务）
+  - `tasks/poem_recognition/retest_poem_recognition.py`（诗句识别复测）
+  - `tasks/benchmarking/benchmark.py`（性能对比）
+- 文档与图像分层目录： docs/  
+  - `docs/reports/`、`docs/papers/`、`docs/slides/`、`docs/figures/`
 
 ### 2.2 遗传算法子项目
 
@@ -114,8 +114,8 @@
 
 本节基于两部分材料：
 
-- 理论基础：王露吉硕士毕业论文（文件：王露吉硕士毕业论文.pdf）
-- 当前实现代码主线：qsw.py、models.py、train_2d.py、train_func_cos6x.py、benchmark.py
+- 理论基础：王露吉硕士毕业论文（文件：docs/papers/王露吉硕士毕业论文.pdf）
+- 当前实现代码主线：qsw.py、models.py、tasks/two_d_classification/train_2d.py、tasks/function_regression/train_func_cos6x.py、tasks/benchmarking/benchmark.py
 
 论文核心演化形式：
 
@@ -135,7 +135,7 @@ $$
 
 ### High-2：训练使用逐样本 Python 循环，导致前向调用次数过多
 
-- 代码位置：train_2d.py、train_func_cos6x.py 的训练循环
+- 代码位置：tasks/two_d_classification/train_2d.py、tasks/function_regression/train_func_cos6x.py 的训练循环
 - 原因：每个样本单独前向，难以利用批处理并行，且 Python 调度开销高。
 - 影响：总训练时长由“单次前向耗时 × 大量调用次数”放大。
 
@@ -147,7 +147,7 @@ $$
 
 ### Medium-1：存在设备同步与数据搬运热点
 
-- 代码位置：qsw.py 中循环内标量提取；train_2d.py 可视化预测中的 `.cpu()`
+- 代码位置：qsw.py 中循环内标量提取；tasks/two_d_classification/train_2d.py 可视化预测中的 `.cpu()`
 - 原因：在循环热路径中触发 host-device 同步，会降低并行吞吐。
 - 影响：GPU 场景下更明显。
 

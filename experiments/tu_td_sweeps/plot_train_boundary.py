@@ -71,8 +71,8 @@ def train_one_n(
 
     for it in range(steps):
         opt.zero_grad()
-        probs, _ = model(Xd)
-        loss = (1.0 - probs[torch.arange(Xd.shape[0], device=device), yd]).mean()
+        _, logits = model(Xd)
+        loss = torch.nn.functional.cross_entropy(logits, yd)
         loss.backward()
         opt.step()
 
@@ -140,7 +140,7 @@ def main():
         ax_loss.plot(losses, lw=1.8)
         ax_loss.set_title(f"N={N} loss")
         ax_loss.set_xlabel("iteration")
-        ax_loss.set_ylabel("1-p(correct)")
+        ax_loss.set_ylabel("cross entropy")
         ax_loss.grid(alpha=0.25)
 
         # 第二行：boundary

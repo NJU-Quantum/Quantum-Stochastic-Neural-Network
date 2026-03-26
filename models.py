@@ -300,7 +300,6 @@ class QSNNText(nn.Module):
         - features: (B, N_words)
         - logits: (B, 2)
         - probs: (B, 2)
-        - legacy_cost: scalar if labels is provided
         """
         if isinstance(sentences, str):
             sentences = [sentences]
@@ -310,15 +309,5 @@ class QSNNText(nn.Module):
         probs = torch.softmax(logits, dim=-1)
 
         out = {"features": features, "logits": logits, "probs": probs}
-
-        if labels is not None:
-            if not torch.is_tensor(labels):
-                labels = torch.tensor(labels, device=self.device, dtype=torch.long)
-            else:
-                labels = labels.to(self.device, dtype=torch.long)
-
-            p_correct = probs.gather(1, labels.view(-1, 1)).squeeze(1)
-            legacy_cost = 1.0 - p_correct.mean()
-            out["legacy_cost"] = legacy_cost
 
         return out

@@ -46,8 +46,8 @@ def main():
     losses = []
     for it in range(steps):
         opt.zero_grad()
-        probs, _ = model(Xd)
-        loss = (1.0 - probs[torch.arange(Xd.shape[0], device=device), yd]).mean()
+        _, logits = model(Xd)
+        loss = torch.nn.functional.cross_entropy(logits, yd)
         loss.backward()
         opt.step()
 
@@ -60,7 +60,7 @@ def main():
     plt.subplot(1,2,1)
     plt.plot(losses)
     plt.title("Training loss")
-    plt.xlabel("iteration"); plt.ylabel("1-p(correct)")
+    plt.xlabel("iteration"); plt.ylabel("cross entropy")
 
     plt.subplot(1,2,2)
     plot_boundary(model, X, y, title="QSNN decision boundary")

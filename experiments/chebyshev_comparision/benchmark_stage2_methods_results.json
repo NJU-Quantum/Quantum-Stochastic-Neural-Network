@@ -1,0 +1,124 @@
+{
+  "device": "cuda",
+  "config": {
+    "forward_ns": [
+      100,
+      200
+    ],
+    "stage2_ns": [
+      100,
+      200,
+      300
+    ],
+    "train_n": 100,
+    "batch_size": 512,
+    "forward_runs": 10,
+    "stage2_runs": 20,
+    "warmup": 3,
+    "train_steps": 100,
+    "stage2_steps": 12
+  },
+  "forward_full": [
+    {
+      "N": 100,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "rk4",
+          "avg_forward_seconds": 0.09563944092951715
+        },
+        {
+          "method": "split",
+          "avg_forward_seconds": 0.02817127131856978
+        }
+      ],
+      "time_ratio_rk4_to_split": 3.3949281112661067,
+      "max_prob_diff": 4.604458808898926e-05,
+      "max_rho_diff": 1.6323671161444508e-06
+    },
+    {
+      "N": 200,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "rk4",
+          "avg_forward_seconds": 0.5000628282781691
+        },
+        {
+          "method": "split",
+          "avg_forward_seconds": 0.17116105798631906
+        }
+      ],
+      "time_ratio_rk4_to_split": 2.92159229535809,
+      "max_prob_diff": 0.00016176700592041016,
+      "max_rho_diff": 4.080124199390411e-06
+    }
+  ],
+  "stage2_only": [
+    {
+      "N": 100,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "rk4",
+          "avg_stage2_seconds": 0.09416489889845252
+        },
+        {
+          "method": "split",
+          "avg_stage2_seconds": 0.021215969743207098
+        }
+      ],
+      "time_ratio_rk4_to_split": 4.438397114918686,
+      "max_rho_diff": 2.332031726837158e-06
+    },
+    {
+      "N": 200,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "rk4",
+          "avg_stage2_seconds": 0.5279742127982899
+        },
+        {
+          "method": "split",
+          "avg_stage2_seconds": 0.1648706265958026
+        }
+      ],
+      "time_ratio_rk4_to_split": 3.2023546201026662,
+      "max_rho_diff": 4.079192876815796e-06
+    },
+    {
+      "N": 300,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "rk4",
+          "avg_stage2_seconds": 1.4994772558566183
+        },
+        {
+          "method": "split",
+          "avg_stage2_seconds": 0.40411667779553684
+        }
+      ],
+      "time_ratio_rk4_to_split": 3.710505748083181,
+      "max_rho_diff": 3.021223619725788e-06
+    }
+  ],
+  "training": {
+    "N": 100,
+    "steps": 100,
+    "measurements": [
+      {
+        "method": "rk4",
+        "train_seconds": 9.091693555004895,
+        "final_loss": 0.06308075040578842
+      },
+      {
+        "method": "split",
+        "train_seconds": 3.852666235063225,
+        "final_loss": 0.0813332051038742
+      }
+    ],
+    "time_ratio_rk4_to_split": 2.359844585617392
+  }
+}

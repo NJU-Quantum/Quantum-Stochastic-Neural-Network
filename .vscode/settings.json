@@ -11,5 +11,7 @@
   "chat.tools.edits.autoApprove": {
     "**/*": true
   },
-  "chat.editing.autoAccept": 0
+  "chat.editing.autoAccept": 0,
+  "python.defaultInterpreterPath": "/Users/hronrad/codes/py/quantum/.venv311/bin/python",
+  "python.terminal.activateEnvironment": true
 }

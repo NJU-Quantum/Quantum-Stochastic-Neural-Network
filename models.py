@@ -65,20 +65,35 @@ def basis(N, i, device):
     return v
 
 class QSNN2D(nn.Module):
-    def __init__(self, N_in=12, T_u=1.0, T_d=1.0, init_h=0.1, init_g=0.1, device="cuda", stage2_steps=20):
+    def __init__(
+        self,
+        N_in=12,
+        T_u=1.0,
+        T_d=1.0,
+        init_h=0.1,
+        init_g=0.1,
+        device="cuda",
+        stage2_steps=20,
+        stage1_method="exact",
+        chebyshev_order=128,
+        chebyshev_tol=1e-10,
+    ):
         super().__init__()
         self.N_in = N_in
         self.N = N_in + 2
         self.T_u, self.T_d = T_u, T_d
         self.device = device
         self.stage2_steps = stage2_steps
+        self.stage1_method = stage1_method
+        self.chebyshev_order = chebyshev_order
+        self.chebyshev_tol = chebyshev_tol
 
         # input-layer Hamiltonian params
         self.Hu_raw = nn.Parameter(init_h * torch.randn(N_in, N_in, device=device, dtype=torch.float32))
         # gammas: 2 outputs x N_in inputs
         self.gamma = nn.Parameter(init_g * torch.randn(2, N_in, device=device, dtype=torch.float32))
 
-    def encode(self, x, y):
+    def encode_state(self, x, y):
         # Eq.(7) with n=2, choose K=N_in/2
         K = self.N_in // 2
         assert 2*K == self.N_in
@@ -95,6 +110,10 @@ class QSNN2D(nn.Module):
         psi[:, :K, 0] = px.to(torch.complex64)
         psi[:, K:2*K, 0] = py.to(torch.complex64)
         psi = psi / torch.linalg.norm(psi, dim=1, keepdim=True).clamp_min(1e-12)
+        return psi
+
+    def encode(self, x, y):
+        psi = self.encode_state(x, y)
         return psi @ psi.mH
 
     def forward(self, xy):
@@ -110,8 +129,21 @@ class QSNN2D(nn.Module):
         H = torch.zeros((N,N), device=self.device, dtype=torch.complex64)
         H[:N_in,:N_in] = Hu
 
-        rho0 = self.encode(x, y)
-        rho_u = evolve(rho0, H, [], self.T_u)
+        if self.stage1_method == "exact":
+            rho0 = self.encode(x, y)
+            rho_u = evolve(rho0, H, [], self.T_u)
+        elif self.stage1_method == "chebyshev":
+            psi0 = self.encode_state(x, y)
+            psi_u = qsw.evolve_state_chebyshev(
+                psi0,
+                H,
+                self.T_u,
+                max_order=self.chebyshev_order,
+                tol=self.chebyshev_tol,
+            )
+            rho_u = psi_u @ psi_u.mH
+        else:
+            raise ValueError(f"Unsupported stage1_method: {self.stage1_method}")
 
         # Stage 2: dissipative input -> output（结构化演化器，适配大 N）
         rho_out = qsw.evolve_qsnn2d_stage2_structured(

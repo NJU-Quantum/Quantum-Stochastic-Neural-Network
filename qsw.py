@@ -1,5 +1,6 @@
 # qsw.py
 import torch
+from scipy import special
 
 def kron(A, B): 
     return torch.kron(A.contiguous(), B.contiguous())
@@ -84,6 +85,68 @@ def evolve_unitary(rho0, H, T):
         return U @ rho0 @ Udag
 
     return U.unsqueeze(0) @ rho0 @ Udag.unsqueeze(0)
+
+
+def evolve_state_chebyshev(psi0, H, T, max_order=128, tol=1e-10):
+    """
+    用 Chebyshev 展开近似计算 psi(T) = exp(-i H T) psi(0)。
+
+    适用于 Hermitian H。支持:
+    - psi0: (N, 1)
+    - psi0: (B, N, 1)
+    """
+    if psi0.dim() == 2:
+        psi = psi0.unsqueeze(0)
+        squeeze_back = True
+    else:
+        psi = psi0
+        squeeze_back = False
+
+    N = H.shape[0]
+    device = H.device
+    dtype = H.dtype
+
+    evals = torch.linalg.eigvalsh(H)
+    e_min = evals[0].real.detach()
+    e_max = evals[-1].real.detach()
+    center = 0.5 * (e_max + e_min)
+    radius = 0.5 * (e_max - e_min)
+
+    if radius.abs().item() < 1e-12:
+        phase = torch.exp((-1j) * center.to(dtype) * T)
+        out = phase * psi
+        if squeeze_back:
+            return out[0]
+        return out
+
+    eye = torch.eye(N, device=device, dtype=dtype)
+    H_scaled = (H - center.to(dtype) * eye) / radius.to(dtype)
+    tau = float((radius * T).item())
+    global_phase = torch.exp((-1j) * center.to(dtype) * T)
+
+    t0 = psi
+    out = special.jv(0, tau) * t0
+
+    if max_order >= 1:
+        t1 = H_scaled.unsqueeze(0) @ psi
+        coeff = 2.0 * special.jv(1, tau) * (-1j)
+        out = out + coeff * t1
+    else:
+        t1 = None
+
+    for n in range(2, max_order + 1):
+        coeff_n = 2.0 * special.jv(n, tau) * ((-1j) ** n)
+        if abs(coeff_n) < tol and n > abs(tau):
+            break
+
+        tn = 2.0 * (H_scaled.unsqueeze(0) @ t1) - t0
+        out = out + coeff_n * tn
+        t0, t1 = t1, tn
+
+    out = global_phase * out
+    if squeeze_back:
+        return out[0]
+    return out
 
 def evolve_vec_rk4(rho0, H, Ls, T, steps=100): # 直接在密度矩阵空间使用RK4方法数值求解Liouvillian演化
     rho = rho0.clone()
@@ -315,4 +378,3 @@ def evolve_qsnn2d_stage2_structured(rho0, H, gamma, T, N_in, steps=20):
         rho = rho + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
 
     return rho
-

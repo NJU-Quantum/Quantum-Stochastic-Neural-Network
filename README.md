@@ -1,188 +1,214 @@
+# Quantum-Stochastic-Neural-Network
 
+## 项目概览
 
-# QAI 项目结构分析文档
+该仓库实现了基于量子随机行走与 Lindblad 动力学的 QSNN（Quantum Stochastic Neural Network）模型，当前主线以 PyTorch 为核心，面向三类任务：
 
-## 1. 项目定位
+- 一维函数拟合：`QSNNFunction`
+- 二维分类：`QSNN2D`
+- 文本/句子识别：`QSNNText`
 
-该仓库是一个以量子随机游走神经网络（QSNN）为核心的研究型代码库，包含三类内容：
+当前主线重点在于：
 
-1. **当前主线实现（根目录）**：基于 PyTorch 的 QSNN 数值演化、建模与训练。
-2. **通用遗传算法框架**：独立于 QSNN 的可复用 GA 组件。
-3. **历史/论文复现实验区**：`cpl` 与 `prr` 两套较大的实验归档代码与数据。
-
----
-
-## 2. 目录与模块职责
-
-### 2.1 根目录（主线开发区）
-
-- 核心数值后端： qsw.py  
-  - 提供李乌维尔演化方法：`evolve_expm`、`evolve_vec_rk4`、`evolve_from_operators`。
-- 模型定义： models.py  
-  - `QSNNFunction`（函数拟合）  
-  - `QSNN2D`（二维分类）
-  - `QSNNText`（诗句/句子识别）
-- 数据生成： data.py  
-  - `make_circles`、`make_moons` 等 2D 数据。
-- 任务脚本分层目录： tasks/  
-  - `tasks/function_regression/train_func_cos6x.py`（回归任务）  
-  - `tasks/two_d_classification/train_2d.py`（分类任务）
-  - `tasks/poem_recognition/retest_poem_recognition.py`（诗句识别复测）
-  - `tasks/benchmarking/benchmark.py`（性能对比）
-- 文档与图像分层目录： docs/  
-  - `docs/reports/`、`docs/papers/`、`docs/slides/`、`docs/figures/`
-
-### 2.2 遗传算法子项目
-
-- 目录： ga_framework
-- 关键模块：
-  - engine.py：`GAEngine`
-  - evaluators：Python/Torch 评估器
-  - operators：选择、交叉、变异、迁移
-  - continuous_torch.py：示例
-- 结论：目前与根目录 QSNN 主训练流程耦合较弱，属于独立能力模块。
-
-### 2.3 历史实验区（CPL）
-
-- 目录： cpl_project_and_data
-- 关键基础文件：  
-  - valedian0910.py  
-  - qutils.py
-- 子目录（`pure` / `mix` / `separate` / `multi_state_discrimination`）多为批量实验脚本及输出结果。
-
-### 2.4 历史实验区（PRR）
-
-- 目录： prr_project_and_data
-- 特征：按研究任务和章节组织，包含大量 `final_data` 批处理实验数据与脚本。
-- 用途偏向：论文复现与结果归档，而非当前主线迭代开发。
+- 统一的量子演化后端 `qsw.py`
+- 主模型定义 `models.py`
+- 面向二维分类的结构化 Stage-2 优化
+- 新增的 Stage-1 Chebyshev 对照路径与基准测试
 
 ---
 
-## 3. 主线架构与执行流程（推荐理解路径）
+## 当前目录结构
 
-1. 数据构造（data.py 或训练脚本内构造）
-2. 模型初始化（models.py 中 `QSNNFunction` / `QSNN2D`）
-3. 量子演化计算（调用 qsw.py 中 `evolve*`）
-4. 读出与损失计算（节点占据概率映射到预测值）
-5. 优化训练（PyTorch 自动求导 + Adam）
-6. 可视化输出（训练曲线、分类图等）
+### 主线代码
 
----
+- [qsw.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/qsw.py)
+  - 量子演化数值后端
+  - 包含 `evolve_expm`、`evolve_unitary`、`evolve_from_operators`
+  - 包含 `QSNN2D` 的结构化 Stage-2 Lindblad RHS 与 RK4 演化器
+  - 包含新增的 `evolve_state_chebyshev()`，用于 Stage-1 的纯态 Chebyshev 演化
+- [models.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/models.py)
+  - `QSNNFunction`：一维函数拟合
+  - `QSNN2D`：二维分类
+  - `QSNNText`：文本任务
+- [data.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/data.py)
+  - 二维玩具数据集，如 `make_circles`
+- [Chebyshev.md](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/Chebyshev.md)
+  - Chebyshev 时间推进理论笔记
 
-## 4. 依赖与运行环境
+### 实验目录
 
-- 已声明依赖： requirements.txt  
-  - `torch`, `numpy`, `matplotlib`, `scipy`
-- 代码中额外常见依赖（未完整写入根依赖文件）：  
-  - `qutip`（主要在 cpl/prr 区域）  
-  - `nltk`（文本相关实验）
-- 环境建议：
-  - Python 科学计算环境
-  - 若运行 cpl/prr，需补齐 QuTiP 与 NLTK 语料
+- [experiments/tu_td_sweeps](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/experiments/tu_td_sweeps)
+  - `plot_train_boundary.py`：不同总神经元规模下的二维分类训练与边界可视化
+  - `sweep_tu_td_grid.py`：`T_u / T_d / stage2_steps` 网格实验
+  - 若干 `.png/.csv/.md` 结果文件
+- [experiments/chebyshev_comparision](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/experiments/chebyshev_comparision)
+  - `benchmark_stage1_methods.py`：`Stage-1 exact` 与 `Stage-1 chebyshev` 对照基准
 
----
+### 历史/归档区域
 
-## 5. 当前工程状态评估
+- `cpl_project_and_data`
+- `prr_project_and_data`
 
-**优点**
-- 主线（`qsw` + `models` + `train_*`）结构相对清晰，便于快速实验。
-- 同时保留多套演化器，利于性能与精度权衡研究。
-
-**主要问题**
-- 主线与历史实验区并存，边界不够清楚。
-- 依赖声明不完整，降低开箱可运行性。
-- 脚本驱动与硬编码参数较多，可复现性与工程化程度有限。
-- 部分空文件与历史脚本增加认知负担。
+这两部分主要用于历史实验和论文复现，不是当前主线优化的重点。
 
 ---
 
-## 6. 建议的文档化分层（可作为 README/项目文档目录）
+## 主线架构
 
-1. 项目概览（研究目标 + 模块边界）
-2. 快速开始（仅主线最小可运行路径）
-3. 主线架构说明（`qsw`、`models`、`train_*`）
-4. 子项目说明（ga_framework、`cpl`、`prr`）
-5. 依赖与环境（含可选依赖）
-6. 实验复现与结果目录规范
-7. 已知问题与后续重构计划
+### 1. 数据编码
+
+输入样本先被编码成量子态。
+
+- `QSNNFunction`：把标量 `x` 编码成幂次特征态
+- `QSNN2D`：把二维输入 `(x, y)` 编码成纯态 `psi`
+  - 前一半输入节点承载 `x` 的幂次
+  - 后一半输入节点承载 `y` 的幂次
+- 纯态再可重建为密度矩阵 `rho = psi psi^\dagger`
+
+### 2. Stage-1：输入层相干演化
+
+`QSNN2D` 的第一阶段只在输入层子块上施加 Hermitian Hamiltonian：
+
+- 输入层神经元之间是可训练的相干耦合
+- 输出节点在这一阶段不参与演化
+
+当前支持两种 Stage-1 方法：
+
+- `stage1_method="exact"`
+  - 直接计算 `U = exp(-i H T_u)`
+  - 再做 `rho_u = U rho_0 U^\dagger`
+- `stage1_method="chebyshev"`
+  - 先对纯态做 Chebyshev 演化
+  - `psi_u = exp(-i H T_u) psi`
+  - 再重建 `rho_u = psi_u psi_u^\dagger`
+
+其中 `chebyshev` 路径是新增的对照实现，用于比较纯态递推近似与原始矩阵指数路径的效率。
+
+### 3. Stage-2：结构化 Lindblad 演化
+
+`QSNN2D` 第二阶段采用结构化的开放系统演化：
+
+- 每个输入节点都单向连接到两个输出节点
+- 跳跃算符固定为
+  - `L_{o,j} = gamma[o,j] |o><j|`
+- 当前实现不再显式构造整组 `L_k`
+- 而是直接按固定拓扑计算结构化 RHS
+
+时间推进采用：
+
+- 结构化 RHS
+- RK4 数值积分
+
+这一段对应 `qsw.py` 中的：
+
+- `_lindblad_rhs_qsnn2d_structured()`
+- `evolve_qsnn2d_stage2_structured()`
+
+### 4. 输出读出
+
+Stage-2 演化结束后，读取两个输出节点的对角元：
+
+- `p0 = rho[out0, out0]`
+- `p1 = rho[out1, out1]`
+
+然后归一化为二分类概率。
 
 ---
 
-# QSNN 当前实现性能瓶颈分析（基于论文理论与代码审计）
+## 运行环境
 
-## 1. 分析范围与依据
+### 依赖
 
-本节基于两部分材料：
+见 [requirements.txt](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/requirements.txt)：
 
-- 理论基础：王露吉硕士毕业论文（文件：docs/papers/王露吉硕士毕业论文.pdf）
-- 当前实现代码主线：qsw.py、models.py、tasks/two_d_classification/train_2d.py、tasks/function_regression/train_func_cos6x.py、tasks/benchmarking/benchmark.py
+- `torch`
+- `numpy`
+- `matplotlib`
+- `scipy`
+- `qutip`
+- `nltk`
 
-论文核心演化形式：
+### 推荐解释器
 
-$$
-|\rho(t)\rangle = e^{\mathcal{L}t}|\rho(0)\rangle
-$$
+当前实验建议使用仓库上一级目录的虚拟环境：
 
-当前实现中的主要耗时，集中在该理论式在工程上的具体实现路径（显式李维尔算符构造与矩阵指数重复计算）。
+```bash
+../.venv311/bin/python
+```
 
-## 2. 瓶颈结论（按重要性排序）
+如果当前目录是仓库根目录：
 
-### High-1：显式构造 Liouvillian 并调用 matrix exponential，复杂度主导总耗时
+```bash
+cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
+../.venv311/bin/python -V
+```
 
-- 代码位置：`liouvillian()` / `evolve_expm()`（qsw.py）
-- 原因：维度从 $N$ 扩展到 $N^2$ 后，对 $(N^2\times N^2)$ 稠密矩阵进行指数计算，代价快速增长（量级可视为 $O(N^6)$）。
-- 影响：模型规模稍增时，前向和反向耗时都会明显恶化。
+---
 
-### High-2：训练使用逐样本 Python 循环，导致前向调用次数过多
+## 常用命令
 
-- 代码位置：tasks/two_d_classification/train_2d.py、tasks/function_regression/train_func_cos6x.py 的训练循环
-- 原因：每个样本单独前向，难以利用批处理并行，且 Python 调度开销高。
-- 影响：总训练时长由“单次前向耗时 × 大量调用次数”放大。
+### 1. 运行二维分类边界实验
 
-### High-3：QSNN2D 前向中动态重建 Lindblad 算符列表
+```bash
+cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
+../.venv311/bin/python experiments/tu_td_sweeps/plot_train_boundary.py
+```
 
-- 代码位置：`QSNN2D.forward()`（models.py）
-- 原因：每次前向都循环构造算符，频繁创建短生命周期张量对象。
-- 影响：额外 CPU/GPU 分配与调度成本显著，尤其在训练样本多时。
+### 2. 运行 Stage-1 方法对照基准
 
-### Medium-1：存在设备同步与数据搬运热点
+脚本位置：
 
-- 代码位置：qsw.py 中循环内标量提取；tasks/two_d_classification/train_2d.py 可视化预测中的 `.cpu()`
-- 原因：在循环热路径中触发 host-device 同步，会降低并行吞吐。
-- 影响：GPU 场景下更明显。
+- [experiments/chebyshev_comparision/benchmark_stage1_methods.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/experiments/chebyshev_comparision/benchmark_stage1_methods.py)
 
-### Medium-2：编码阶段未充分向量化
+默认运行全模型前向、Stage-1 单独耗时、以及训练对照：
 
-- 代码位置：`QSNNFunction.encode()`、`QSNN2D.encode()`（models.py）
-- 原因：幂次与双重循环编码以标量流程为主。
-- 影响：单次影响中等，但在大量迭代下累计可观。
+```bash
+cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
+../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py
+```
 
-### Low-1：基准脚本设备策略不健壮，影响诊断效率
+保存结果到 JSON：
 
-- 代码位置：benchmark.py
-- 现象：固定 `cuda` 设备在无 CUDA 环境下直接失败（当前终端记录也显示 `benchmark.py` 运行失败）。
-- 影响：不直接造成训练慢，但阻碍稳定的性能回归与对比。
+```bash
+../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
+  --out experiments/chebyshev_comparision/benchmark_stage1_methods_results.json
+```
 
-## 3. 论文理论与实现偏差的关键点
+指定设备和规模：
 
-- 论文层面强调模型有效性与可训练性；
-- 当前工程实现更偏“直观复现”，未充分采用高效数值路径（如仅求 $e^{\mathcal{L}t}v$ 的策略、算符缓存、批处理）；
-- 因此慢的主要根因是“实现策略与工程组织”，而不是 QSNN 思想本身。
+```bash
+../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
+  --device cpu \
+  --forward-ns 100,200 \
+  --stage1-ns 100,200,300 \
+  --train-n 100 \
+  --train-steps 100 \
+  --batch-size 512
+```
 
-## 4. 优先级优化方向（后续实施建议）
+只跑训练对照：
 
-1. **最高优先级**：减少显式 `matrix_exp` 在训练内的重复使用（优先替换为向量作用形式或近似乘法策略）。
-2. **高优先级**：将逐样本训练改为批处理/向量化训练流程。
-3. **高优先级**：将固定结构的 Lindblad 构造改为初始化缓存，避免每次 forward 重建。
-4. **中优先级**：清理热路径中的同步点（循环内 `.item()` / 高频 `.cpu()`）。
-5. **中优先级**：统一性能基准脚本设备选择逻辑，支持 CPU/GPU 自适应。
+```bash
+../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
+  --skip-forward --skip-stage1
+```
 
-## 5. 总结
+---
 
-当前运行缓慢的主要来源可归结为两点：
+## 当前性能优化状态
 
-1) 李维尔空间显式指数计算成本高；
-2) 训练组织方式（逐样本循环）放大了这一成本。
+相较于更早的通用实现，当前主线已经做了两类关键优化：
 
-按上述优先级推进后，吞吐与可扩展性将获得最明显提升。
+- `Stage-1`：当仅有 Hamiltonian 演化时，直接走幺正演化路径
+- `Stage-2`：对 `QSNN2D` 使用结构化 Lindblad RHS，避免显式构造通用跳跃算符与大规模 Liouvillian
 
+当前新增的 Chebyshev 路径主要用于继续评估：
+
+- 对纯幺正 Stage-1，纯态 Chebyshev 递推是否比 `matrix_exp` 更高效
+- 在不同 `N`、不同 batch、不同设备上，效率收益是否稳定
+
+---
+
+## 说明
+
+`README` 现在主要描述当前仍在使用的主线实现和实验入口。历史实验区中的批量脚本、论文归档与旧路径没有逐一展开，如需追溯可再进入对应目录查看。

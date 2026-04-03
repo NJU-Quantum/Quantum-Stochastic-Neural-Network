@@ -21,27 +21,27 @@
 
 ### 主线代码
 
-- [qsw.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/qsw.py)
+- `qsw.py`
   - 量子演化数值后端
   - 包含 `evolve_expm`、`evolve_unitary`、`evolve_from_operators`
   - 包含 `QSNN2D` 的结构化 Stage-2 Lindblad RHS 与 RK4 演化器
   - 包含新增的 `evolve_state_chebyshev()`，用于 Stage-1 的纯态 Chebyshev 演化
-- [models.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/models.py)
+- `models.py`
   - `QSNNFunction`：一维函数拟合
   - `QSNN2D`：二维分类
   - `QSNNText`：文本任务
-- [data.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/data.py)
+- `data.py`
   - 二维玩具数据集，如 `make_circles`
-- [Chebyshev.md](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/Chebyshev.md)
+- `Chebyshev.md`
   - Chebyshev 时间推进理论笔记
 
 ### 实验目录
 
-- [experiments/tu_td_sweeps](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/experiments/tu_td_sweeps)
+- `experiments/tu_td_sweeps`
   - `plot_train_boundary.py`：不同总神经元规模下的二维分类训练与边界可视化
   - `sweep_tu_td_grid.py`：`T_u / T_d / stage2_steps` 网格实验
   - 若干 `.png/.csv/.md` 结果文件
-- [experiments/chebyshev_comparision](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/experiments/chebyshev_comparision)
+- `experiments/chebyshev_comparision`
   - `benchmark_stage1_methods.py`：`Stage-1 exact` 与 `Stage-1 chebyshev` 对照基准
 
 ### 历史/归档区域
@@ -119,7 +119,7 @@ Stage-2 演化结束后，读取两个输出节点的对角元：
 
 ### 依赖
 
-见 [requirements.txt](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/requirements.txt)：
+见 `requirements.txt`：
 
 - `torch`
 - `numpy`
@@ -128,56 +128,37 @@ Stage-2 演化结束后，读取两个输出节点的对角元：
 - `qutip`
 - `nltk`
 
-### 推荐解释器
-
-当前实验建议使用仓库上一级目录的虚拟环境：
-
-```bash
-../.venv311/bin/python
-```
-
-如果当前目录是仓库根目录：
-
-```bash
-cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
-../.venv311/bin/python -V
-```
-
----
-
 ## 常用命令
 
 ### 1. 运行二维分类边界实验
 
 ```bash
-cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
-../.venv311/bin/python experiments/tu_td_sweeps/plot_train_boundary.py
+python experiments/tu_td_sweeps/plot_train_boundary.py
 ```
 
 ### 2. 运行 Stage-1 方法对照基准
 
 脚本位置：
 
-- [experiments/chebyshev_comparision/benchmark_stage1_methods.py](/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/experiments/chebyshev_comparision/benchmark_stage1_methods.py)
+- `experiments/chebyshev_comparision/benchmark_stage1_methods.py`
 
 默认运行全模型前向、Stage-1 单独耗时、以及训练对照：
 
 ```bash
-cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
-../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py
+python experiments/chebyshev_comparision/benchmark_stage1_methods.py
 ```
 
 保存结果到 JSON：
 
 ```bash
-../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
+python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
   --out experiments/chebyshev_comparision/benchmark_stage1_methods_results.json
 ```
 
 指定设备和规模：
 
 ```bash
-../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
+python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
   --device cpu \
   --forward-ns 100,200 \
   --stage1-ns 100,200,300 \
@@ -189,7 +170,7 @@ cd /Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network
 只跑训练对照：
 
 ```bash
-../.venv311/bin/python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
+python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
   --skip-forward --skip-stage1
 ```
 

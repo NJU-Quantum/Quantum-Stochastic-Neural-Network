@@ -13,7 +13,6 @@ if str(ROOT) not in sys.path:
 
 from data import make_circles
 from models import QSNN2D
-import qsw
 
 
 def parse_int_list(value: str) -> List[int]:
@@ -38,10 +37,8 @@ def clone_weights(dst: torch.nn.Module, src: torch.nn.Module) -> None:
 def build_model(
     N: int,
     device: torch.device,
-    stage1_method: str,
+    stage2_method: str,
     stage2_steps: int,
-    chebyshev_order: int,
-    chebyshev_tol: float,
 ) -> QSNN2D:
     return QSNN2D(
         N_in=N - 2,
@@ -50,10 +47,9 @@ def build_model(
         init_h=0.1,
         init_g=0.1,
         device=device,
+        stage1_method="exact",
+        stage2_method=stage2_method,
         stage2_steps=stage2_steps,
-        stage1_method=stage1_method,
-        chebyshev_order=chebyshev_order,
-        chebyshev_tol=chebyshev_tol,
     )
 
 
@@ -64,23 +60,17 @@ def benchmark_forward_full(
     runs: int,
     device: torch.device,
     stage2_steps: int,
-    chebyshev_order: int,
-    chebyshev_tol: float,
-) -> dict:
+) -> Dict:
     xy = torch.rand(batch_size, 2, device=device)
     torch.manual_seed(0)
 
-    exact = build_model(
-        N, device, "exact", stage2_steps, chebyshev_order, chebyshev_tol
-    )
-    cheb = build_model(
-        N, device, "chebyshev", stage2_steps, chebyshev_order, chebyshev_tol
-    )
-    clone_weights(cheb, exact)
+    rk4 = build_model(N, device, "rk4", stage2_steps)
+    split = build_model(N, device, "split", stage2_steps)
+    clone_weights(split, rk4)
 
     measurements = []
     outputs = {}
-    for method, model in [("exact", exact), ("chebyshev", cheb)]:
+    for method, model in [("rk4", rk4), ("split", split)]:
         model.eval()
         with torch.no_grad():
             for _ in range(warmup):
@@ -91,70 +81,68 @@ def benchmark_forward_full(
                 probs, rho = model(xy)
             sync_if_needed(device)
             elapsed = time.perf_counter() - t0
-        label = "exact_state" if method == "exact" else method
         measurements.append(
             {
-                "method": label,
+                "method": method,
                 "avg_forward_seconds": elapsed / runs,
             }
         )
         outputs[method] = (probs, rho)
 
-    prob_diff = (
-        outputs["exact"][0] - outputs["chebyshev"][0]
-    ).abs().max().item()
-    rho_diff = (
-        outputs["exact"][1] - outputs["chebyshev"][1]
-    ).abs().max().item()
-
-    exact_t = measurements[0]["avg_forward_seconds"]
-    cheb_t = measurements[1]["avg_forward_seconds"]
+    prob_diff = (outputs["rk4"][0] - outputs["split"][0]).abs().max().item()
+    rho_diff = (outputs["rk4"][1] - outputs["split"][1]).abs().max().item()
+    rk4_t = measurements[0]["avg_forward_seconds"]
+    split_t = measurements[1]["avg_forward_seconds"]
     return {
         "N": N,
         "batch_size": batch_size,
         "measurements": measurements,
-        "time_ratio_exact_to_chebyshev": exact_t / cheb_t,
+        "time_ratio_rk4_to_split": rk4_t / split_t,
         "max_prob_diff": prob_diff,
         "max_rho_diff": rho_diff,
     }
 
 
-def benchmark_stage1_only(
+def benchmark_stage2_only(
     N: int,
     batch_size: int,
     warmup: int,
     runs: int,
     device: torch.device,
-    chebyshev_order: int,
-    chebyshev_tol: float,
-) -> dict:
+    stage2_steps: int,
+) -> Dict:
     xy = torch.rand(batch_size, 2, device=device)
     torch.manual_seed(0)
-    model = build_model(
-        N, device, "exact", stage2_steps=12, chebyshev_order=chebyshev_order, chebyshev_tol=chebyshev_tol
-    )
+
+    rk4_model = build_model(N, device, "rk4", stage2_steps)
+    split_model = build_model(N, device, "split", stage2_steps)
+    clone_weights(split_model, rk4_model)
 
     x, y = xy[:, 0], xy[:, 1]
-    psi0 = model.encode_state(x, y)
-    Hf = model.Hu_raw.to(torch.complex64)
+    psi0 = rk4_model.encode_state(x, y)
+    Hf = rk4_model.Hu_raw.to(torch.complex64)
     Hu = 0.5 * (Hf + Hf.mH)
-    H = torch.zeros((model.N, model.N), device=device, dtype=torch.complex64)
-    H[: model.N_in, : model.N_in] = Hu
+    H = torch.zeros((rk4_model.N, rk4_model.N), device=device, dtype=torch.complex64)
+    H[: rk4_model.N_in, : rk4_model.N_in] = Hu
+    psi_u = torch.matrix_exp((-1j) * H * rk4_model.T_u).unsqueeze(0) @ psi0
+    rho_u = psi_u @ psi_u.mH
+    gamma = rk4_model.gamma.to(torch.complex64)
 
-    def run_exact():
-        U = torch.matrix_exp((-1j) * H * model.T_u)
-        psi_u = U.unsqueeze(0) @ psi0
-        return psi_u @ psi_u.mH
-
-    def run_chebyshev():
-        psi_u = qsw.evolve_state_chebyshev(
-            psi0, H, model.T_u, max_order=chebyshev_order, tol=chebyshev_tol
+    def run_rk4():
+        import qsw
+        return qsw.evolve_qsnn2d_stage2_structured(
+            rho_u, H, gamma, rk4_model.T_d, rk4_model.N_in, steps=stage2_steps
         )
-        return psi_u @ psi_u.mH
+
+    def run_split():
+        import qsw
+        return qsw.evolve_qsnn2d_stage2_split(
+            rho_u, H, gamma, rk4_model.T_d, rk4_model.N_in, steps=stage2_steps
+        )
 
     measurements = []
     outputs = {}
-    for method, fn in [("exact", run_exact), ("chebyshev", run_chebyshev)]:
+    for method, fn in [("rk4", run_rk4), ("split", run_split)]:
         with torch.no_grad():
             for _ in range(warmup):
                 rho = fn()
@@ -164,23 +152,22 @@ def benchmark_stage1_only(
                 rho = fn()
             sync_if_needed(device)
             elapsed = time.perf_counter() - t0
-        label = "exact_state" if method == "exact" else method
         measurements.append(
             {
-                "method": label,
-                "avg_stage1_seconds": elapsed / runs,
+                "method": method,
+                "avg_stage2_seconds": elapsed / runs,
             }
         )
         outputs[method] = rho
 
-    rho_diff = (outputs["exact"] - outputs["chebyshev"]).abs().max().item()
-    exact_t = measurements[0]["avg_stage1_seconds"]
-    cheb_t = measurements[1]["avg_stage1_seconds"]
+    rho_diff = (outputs["rk4"] - outputs["split"]).abs().max().item()
+    rk4_t = measurements[0]["avg_stage2_seconds"]
+    split_t = measurements[1]["avg_stage2_seconds"]
     return {
         "N": N,
         "batch_size": batch_size,
         "measurements": measurements,
-        "time_ratio_exact_to_chebyshev": exact_t / cheb_t,
+        "time_ratio_rk4_to_split": rk4_t / split_t,
         "max_rho_diff": rho_diff,
     }
 
@@ -190,18 +177,14 @@ def benchmark_training(
     steps: int,
     device: torch.device,
     stage2_steps: int,
-    chebyshev_order: int,
-    chebyshev_tol: float,
-) -> dict:
+) -> Dict:
     X, y = make_circles(n=100, noise=0.05, factor=0.5, seed=0)
     Xd, yd = X.to(device), y.to(device)
 
     results = []
-    for method in ["exact", "chebyshev"]:
+    for method in ["rk4", "split"]:
         torch.manual_seed(0)
-        model = build_model(
-            N, device, method, stage2_steps, chebyshev_order, chebyshev_tol
-        )
+        model = build_model(N, device, method, stage2_steps)
         opt = torch.optim.Adam(model.parameters(), lr=3e-2)
 
         sync_if_needed(device)
@@ -217,10 +200,9 @@ def benchmark_training(
         sync_if_needed(device)
         elapsed = time.perf_counter() - t0
 
-        label = "exact_state" if method == "exact" else method
         results.append(
             {
-                "method": label,
+                "method": method,
                 "train_seconds": elapsed,
                 "final_loss": last_loss,
             }
@@ -230,9 +212,7 @@ def benchmark_training(
         "N": N,
         "steps": steps,
         "measurements": results,
-        "time_ratio_exact_to_chebyshev": (
-            results[0]["train_seconds"] / results[1]["train_seconds"]
-        ),
+        "time_ratio_rk4_to_split": results[0]["train_seconds"] / results[1]["train_seconds"],
     }
 
 
@@ -242,10 +222,7 @@ def print_section(title: str, rows: List[Dict], time_key: str) -> None:
         print(f"N={row['N']}")
         for m in row["measurements"]:
             print(f"  {m['method']:10s} {time_key}={m[time_key]:.6f}")
-        print(
-            f"  time_ratio_exact_to_chebyshev="
-            f"{row['time_ratio_exact_to_chebyshev']:.3f}"
-        )
+        print(f"  time_ratio_rk4_to_split={row['time_ratio_rk4_to_split']:.3f}")
         if "max_prob_diff" in row:
             print(
                 f"  max_prob_diff={row['max_prob_diff']:.3e} "
@@ -257,22 +234,20 @@ def print_section(title: str, rows: List[Dict], time_key: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Benchmark QSNN2D stage-1 exact_state vs chebyshev."
+        description="Benchmark QSNN2D stage-2 rk4 vs split."
     )
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--forward-ns", default="100,200")
-    parser.add_argument("--stage1-ns", default="100,200,300")
+    parser.add_argument("--stage2-ns", default="100,200,300")
     parser.add_argument("--train-n", type=int, default=100)
     parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--forward-runs", type=int, default=10)
-    parser.add_argument("--stage1-runs", type=int, default=20)
+    parser.add_argument("--stage2-runs", type=int, default=20)
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--train-steps", type=int, default=100)
     parser.add_argument("--stage2-steps", type=int, default=12)
-    parser.add_argument("--chebyshev-order", type=int, default=128)
-    parser.add_argument("--chebyshev-tol", type=float, default=1e-10)
     parser.add_argument("--skip-forward", action="store_true")
-    parser.add_argument("--skip-stage1", action="store_true")
+    parser.add_argument("--skip-stage2", action="store_true")
     parser.add_argument("--skip-train", action="store_true")
     parser.add_argument("--out", type=str, default="")
     args = parser.parse_args()
@@ -282,19 +257,17 @@ def main() -> None:
         "device": str(device),
         "config": {
             "forward_ns": parse_int_list(args.forward_ns),
-            "stage1_ns": parse_int_list(args.stage1_ns),
+            "stage2_ns": parse_int_list(args.stage2_ns),
             "train_n": args.train_n,
             "batch_size": args.batch_size,
             "forward_runs": args.forward_runs,
-            "stage1_runs": args.stage1_runs,
+            "stage2_runs": args.stage2_runs,
             "warmup": args.warmup,
             "train_steps": args.train_steps,
             "stage2_steps": args.stage2_steps,
-            "chebyshev_order": args.chebyshev_order,
-            "chebyshev_tol": args.chebyshev_tol,
         },
         "forward_full": [],
-        "stage1_only": [],
+        "stage2_only": [],
         "training": None,
     }
 
@@ -310,8 +283,6 @@ def main() -> None:
                     runs=args.forward_runs,
                     device=device,
                     stage2_steps=args.stage2_steps,
-                    chebyshev_order=args.chebyshev_order,
-                    chebyshev_tol=args.chebyshev_tol,
                 )
             )
         print_section(
@@ -320,23 +291,22 @@ def main() -> None:
             "avg_forward_seconds",
         )
 
-    if not args.skip_stage1:
-        for N in parse_int_list(args.stage1_ns):
-            payload["stage1_only"].append(
-                benchmark_stage1_only(
+    if not args.skip_stage2:
+        for N in parse_int_list(args.stage2_ns):
+            payload["stage2_only"].append(
+                benchmark_stage2_only(
                     N=N,
                     batch_size=args.batch_size,
                     warmup=args.warmup,
-                    runs=args.stage1_runs,
+                    runs=args.stage2_runs,
                     device=device,
-                    chebyshev_order=args.chebyshev_order,
-                    chebyshev_tol=args.chebyshev_tol,
+                    stage2_steps=args.stage2_steps,
                 )
             )
         print_section(
-            "Stage-1 Only Benchmark",
-            payload["stage1_only"],
-            "avg_stage1_seconds",
+            "Stage-2 Only Benchmark",
+            payload["stage2_only"],
+            "avg_stage2_seconds",
         )
 
     if not args.skip_train:
@@ -345,14 +315,9 @@ def main() -> None:
             steps=args.train_steps,
             device=device,
             stage2_steps=args.stage2_steps,
-            chebyshev_order=args.chebyshev_order,
-            chebyshev_tol=args.chebyshev_tol,
         )
         print("\n=== Training Benchmark ===")
-        print(
-            f"N={payload['training']['N']} "
-            f"steps={payload['training']['steps']}"
-        )
+        print(f"N={payload['training']['N']} steps={payload['training']['steps']}")
         for item in payload["training"]["measurements"]:
             print(
                 f"  {item['method']:10s} "
@@ -360,8 +325,8 @@ def main() -> None:
                 f"final_loss={item['final_loss']:.6f}"
             )
         print(
-            "  time_ratio_exact_to_chebyshev="
-            f"{payload['training']['time_ratio_exact_to_chebyshev']:.3f}"
+            "  time_ratio_rk4_to_split="
+            f"{payload['training']['time_ratio_rk4_to_split']:.3f}"
         )
 
     if args.out:

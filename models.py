@@ -74,6 +74,7 @@ class QSNN2D(nn.Module):
         init_g=0.1,
         device="cuda",
         stage2_steps=20,
+        stage2_method="rk4",
         stage1_method="exact",
         chebyshev_order=128,
         chebyshev_tol=1e-10,
@@ -84,6 +85,7 @@ class QSNN2D(nn.Module):
         self.T_u, self.T_d = T_u, T_d
         self.device = device
         self.stage2_steps = stage2_steps
+        self.stage2_method = stage2_method
         self.stage1_method = stage1_method
         self.chebyshev_order = chebyshev_order
         self.chebyshev_tol = chebyshev_tol
@@ -146,15 +148,27 @@ class QSNN2D(nn.Module):
         else:
             raise ValueError(f"Unsupported stage1_method: {self.stage1_method}")
 
-        # Stage 2: dissipative input -> output（结构化演化器，适配大 N）
-        rho_out = qsw.evolve_qsnn2d_stage2_structured(
-            rho_u,
-            H,
-            self.gamma.to(torch.complex64),
-            self.T_d,
-            N_in,
-            steps=self.stage2_steps,
-        )
+        gamma = self.gamma.to(torch.complex64)
+        if self.stage2_method == "rk4":
+            rho_out = qsw.evolve_qsnn2d_stage2_structured(
+                rho_u,
+                H,
+                gamma,
+                self.T_d,
+                N_in,
+                steps=self.stage2_steps,
+            )
+        elif self.stage2_method == "split":
+            rho_out = qsw.evolve_qsnn2d_stage2_split(
+                rho_u,
+                H,
+                gamma,
+                self.T_d,
+                N_in,
+                steps=self.stage2_steps,
+            )
+        else:
+            raise ValueError(f"Unsupported stage2_method: {self.stage2_method}")
 
         out0, out1 = N_in, N_in + 1
 

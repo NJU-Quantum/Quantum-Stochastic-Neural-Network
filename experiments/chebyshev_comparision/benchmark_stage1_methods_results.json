@@ -1,0 +1,126 @@
+{
+  "device": "cuda",
+  "config": {
+    "forward_ns": [
+      100,
+      200
+    ],
+    "stage1_ns": [
+      100,
+      200,
+      300
+    ],
+    "train_n": 100,
+    "batch_size": 512,
+    "forward_runs": 10,
+    "stage1_runs": 20,
+    "warmup": 3,
+    "train_steps": 100,
+    "stage2_steps": 12,
+    "chebyshev_order": 128,
+    "chebyshev_tol": 1e-10
+  },
+  "forward_full": [
+    {
+      "N": 100,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_forward_seconds": 0.0955775692127645
+        },
+        {
+          "method": "chebyshev",
+          "avg_forward_seconds": 0.0987423479091376
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.9679491245307907,
+      "max_prob_diff": 6.556510925292969e-07,
+      "max_rho_diff": 1.072883719643869e-06
+    },
+    {
+      "N": 200,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_forward_seconds": 0.4960936752613634
+        },
+        {
+          "method": "chebyshev",
+          "avg_forward_seconds": 0.5031437024939805
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.9859880443744568,
+      "max_prob_diff": 2.682209014892578e-07,
+      "max_rho_diff": 2.6077046300088114e-07
+    }
+  ],
+  "stage1_only": [
+    {
+      "N": 100,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_stage1_seconds": 0.002213146397843957
+        },
+        {
+          "method": "chebyshev",
+          "avg_stage1_seconds": 0.0031800915021449327
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.6959379616439392,
+      "max_rho_diff": 3.337860107421875e-06
+    },
+    {
+      "N": 200,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_stage1_seconds": 0.002359202248044312
+        },
+        {
+          "method": "chebyshev",
+          "avg_stage1_seconds": 0.004422672744840384
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.5334336009365885,
+      "max_rho_diff": 1.6689300537109375e-06
+    },
+    {
+      "N": 300,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_stage1_seconds": 0.0025850750040262937
+        },
+        {
+          "method": "chebyshev",
+          "avg_stage1_seconds": 0.006538098584860564
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.3953863604951171,
+      "max_rho_diff": 3.248453140258789e-06
+    }
+  ],
+  "training": {
+    "N": 100,
+    "steps": 100,
+    "measurements": [
+      {
+        "method": "exact_state",
+        "train_seconds": 9.218338044825941,
+        "final_loss": 0.06308075040578842
+      },
+      {
+        "method": "chebyshev",
+        "train_seconds": 9.826371740084141,
+        "final_loss": 0.05525164306163788
+      }
+    ],
+    "time_ratio_exact_to_chebyshev": 0.9381222580072068
+  }
+}

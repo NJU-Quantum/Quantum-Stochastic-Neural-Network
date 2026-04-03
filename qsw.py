@@ -379,6 +379,84 @@ def _lindblad_rhs_qsnn2d_structured(rho, H, gamma, N_in):
     return drho
 
 
+def _qsnn2d_structured_dissipative_exact_step(rho, gamma, dt, N_in):
+    """
+    QSNN2D 结构化耗散部分的精确一步更新：
+        d rho / dt = -1/2 {D, rho} + J(rho)
+
+    其中:
+    - D 为输入节点上的对角阻尼
+    - J 只将输入对角元泵入两个输出对角元
+    """
+    if rho.dim() == 2:
+        rho_b = rho.unsqueeze(0)
+        squeeze_back = True
+    else:
+        rho_b = rho
+        squeeze_back = False
+
+    B, N, _ = rho_b.shape
+    out0, out1 = N_in, N_in + 1
+    gabs2 = gamma.abs() ** 2  # (2, N_in)
+    damp_in = gabs2.sum(dim=0).to(rho_b.real.dtype)  # (N_in,)
+
+    damp_full = torch.zeros((N,), device=rho_b.device, dtype=rho_b.real.dtype)
+    damp_full[:N_in] = damp_in
+
+    decay = torch.exp(
+        -0.5 * dt * (damp_full.view(N, 1) + damp_full.view(1, N))
+    ).to(rho_b.dtype)
+    rho_next = rho_b * decay.view(1, N, N)
+
+    rho_in_diag0 = torch.diagonal(rho_b[:, :N_in, :N_in], dim1=-2, dim2=-1).real
+
+    transfer = torch.where(
+        damp_in > 1e-12,
+        (1.0 - torch.exp(-damp_in * dt)) / damp_in,
+        torch.full_like(damp_in, dt),
+    )
+
+    gain_weights0 = (gabs2[0].to(rho_b.real.dtype) * transfer).view(1, N_in)
+    gain_weights1 = (gabs2[1].to(rho_b.real.dtype) * transfer).view(1, N_in)
+    gain0 = (rho_in_diag0 * gain_weights0).sum(dim=1)
+    gain1 = (rho_in_diag0 * gain_weights1).sum(dim=1)
+
+    rho_next[:, out0, out0] = rho_next[:, out0, out0] + gain0.to(rho_b.dtype)
+    rho_next[:, out1, out1] = rho_next[:, out1, out1] + gain1.to(rho_b.dtype)
+
+    if squeeze_back:
+        return rho_next[0]
+    return rho_next
+
+
+def evolve_qsnn2d_stage2_split(rho0, H, gamma, T, N_in, steps=20):
+    """
+    QSNN2D 第二阶段对称分裂演化器：
+        exp(dt/2 L_H) exp(dt (L_D + L_J)) exp(dt/2 L_H)
+
+    其中耗散部分 (L_D + L_J) 采用结构化精确一步更新。
+    """
+    rho = rho0.clone()
+    dt = T / steps
+    U_half = torch.matrix_exp((-0.5j) * H * dt)
+    U_half_dag = U_half.mH
+
+    if rho.dim() == 2:
+        for _ in range(steps):
+            rho = U_half @ rho @ U_half_dag
+            rho = _qsnn2d_structured_dissipative_exact_step(rho, gamma, dt, N_in)
+            rho = U_half @ rho @ U_half_dag
+        return rho
+
+    U_half_b = U_half.unsqueeze(0)
+    U_half_dag_b = U_half_dag.unsqueeze(0)
+    for _ in range(steps):
+        rho = U_half_b @ rho @ U_half_dag_b
+        rho = _qsnn2d_structured_dissipative_exact_step(rho, gamma, dt, N_in)
+        rho = U_half_b @ rho @ U_half_dag_b
+    return rho
+
+
 def evolve_qsnn2d_stage2_structured(rho0, H, gamma, T, N_in, steps=20):
     """
     QSNN2D 第二阶段专用演化器：结构化 Lindblad + RK4

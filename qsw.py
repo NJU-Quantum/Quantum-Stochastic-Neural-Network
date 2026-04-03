@@ -87,6 +87,23 @@ def evolve_unitary(rho0, H, T):
     return U.unsqueeze(0) @ rho0 @ Udag.unsqueeze(0)
 
 
+def evolve_state_exact(psi0, H, T):
+    """
+    纯态幺正演化：
+        psi(T) = U psi(0), U = exp(-i H T)
+
+    支持:
+    - psi0: (N, 1)
+    - psi0: (B, N, 1)
+    """
+    U = torch.matrix_exp((-1j) * H * T)
+
+    if psi0.dim() == 2:
+        return U @ psi0
+
+    return U.unsqueeze(0) @ psi0
+
+
 def evolve_state_chebyshev(psi0, H, T, max_order=128, tol=1e-10):
     """
     用 Chebyshev 展开近似计算 psi(T) = exp(-i H T) psi(0)。

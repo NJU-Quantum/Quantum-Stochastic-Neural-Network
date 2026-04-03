@@ -91,9 +91,10 @@ def benchmark_forward_full(
                 probs, rho = model(xy)
             sync_if_needed(device)
             elapsed = time.perf_counter() - t0
+        label = "exact_state" if method == "exact" else method
         measurements.append(
             {
-                "method": method,
+                "method": label,
                 "avg_forward_seconds": elapsed / runs,
             }
         )
@@ -163,9 +164,10 @@ def benchmark_stage1_only(
                 rho = fn()
             sync_if_needed(device)
             elapsed = time.perf_counter() - t0
+        label = "exact_state" if method == "exact" else method
         measurements.append(
             {
-                "method": method,
+                "method": label,
                 "avg_stage1_seconds": elapsed / runs,
             }
         )
@@ -215,9 +217,10 @@ def benchmark_training(
         sync_if_needed(device)
         elapsed = time.perf_counter() - t0
 
+        label = "exact_state" if method == "exact" else method
         results.append(
             {
-                "method": method,
+                "method": label,
                 "train_seconds": elapsed,
                 "final_loss": last_loss,
             }
@@ -254,7 +257,7 @@ def print_section(title: str, rows: List[Dict], time_key: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Benchmark QSNN2D stage-1 exact vs chebyshev."
+        description="Benchmark QSNN2D stage-1 exact_state vs chebyshev."
     )
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--forward-ns", default="100,200")

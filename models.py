@@ -130,8 +130,9 @@ class QSNN2D(nn.Module):
         H[:N_in,:N_in] = Hu
 
         if self.stage1_method == "exact":
-            rho0 = self.encode(x, y)
-            rho_u = evolve(rho0, H, [], self.T_u)
+            psi0 = self.encode_state(x, y)
+            psi_u = qsw.evolve_state_exact(psi0, H, self.T_u)
+            rho_u = psi_u @ psi_u.mH
         elif self.stage1_method == "chebyshev":
             psi0 = self.encode_state(x, y)
             psi_u = qsw.evolve_state_chebyshev(

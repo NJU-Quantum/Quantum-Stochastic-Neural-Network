@@ -3,6 +3,7 @@ import json
 import sys
 import time
 from pathlib import Path
+from typing import Dict, List
 
 import torch
 
@@ -15,7 +16,7 @@ from models import QSNN2D
 import qsw
 
 
-def parse_int_list(value: str) -> list[int]:
+def parse_int_list(value: str) -> List[int]:
     return [int(v.strip()) for v in value.split(",") if v.strip()]
 
 
@@ -232,7 +233,7 @@ def benchmark_training(
     }
 
 
-def print_section(title: str, rows: list[dict], time_key: str) -> None:
+def print_section(title: str, rows: List[Dict], time_key: str) -> None:
     print(f"\n=== {title} ===")
     for row in rows:
         print(f"N={row['N']}")

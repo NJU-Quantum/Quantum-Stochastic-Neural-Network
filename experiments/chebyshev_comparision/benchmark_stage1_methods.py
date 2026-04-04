@@ -8,6 +8,7 @@ from typing import Dict, List
 import torch
 
 ROOT = Path(__file__).resolve().parents[2]
+SCRIPT_DIR = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -336,7 +337,7 @@ def main() -> None:
     parser.add_argument(
         "--out",
         type=str,
-        default="experiments/chebyshev_comparision/benchmark_stage1_methods_results.json",
+        default=str(SCRIPT_DIR / "results" / "benchmark_stage1_methods_results.json"),
     )
     args = parser.parse_args()
 

@@ -1,0 +1,185 @@
+{
+  "device": "cuda",
+  "config": {
+    "N": 100,
+    "train_steps": 100,
+    "seed": 0,
+    "stage2_method": "rk4",
+    "stage2_steps": 12,
+    "chebyshev_order_list": [
+      32,
+      64,
+      96,
+      128
+    ],
+    "chebyshev_tol": 1e-10,
+    "stage1_suzuki_steps_list": [
+      4,
+      8,
+      12,
+      16,
+      24,
+      32
+    ],
+    "stage1_suzuki_order": 2,
+    "eps": 0.002,
+    "baseline_method": "exact_state"
+  },
+  "raw_results": [
+    {
+      "stage1_method": "exact_state",
+      "train_seconds": 10.461754416115582,
+      "final_loss": 0.06308075040578842,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": null,
+      "stage1_suzuki_order": null
+    },
+    {
+      "stage1_method": "chebyshev",
+      "train_seconds": 11.11946675227955,
+      "final_loss": 0.05525164306163788,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": 32,
+      "stage1_suzuki_steps": null,
+      "stage1_suzuki_order": null
+    },
+    {
+      "stage1_method": "chebyshev",
+      "train_seconds": 10.913897471968085,
+      "final_loss": 0.05525164306163788,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": 64,
+      "stage1_suzuki_steps": null,
+      "stage1_suzuki_order": null
+    },
+    {
+      "stage1_method": "chebyshev",
+      "train_seconds": 9.966516594868153,
+      "final_loss": 0.05525164306163788,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": 96,
+      "stage1_suzuki_steps": null,
+      "stage1_suzuki_order": null
+    },
+    {
+      "stage1_method": "chebyshev",
+      "train_seconds": 9.91535791195929,
+      "final_loss": 0.05525164306163788,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": 128,
+      "stage1_suzuki_steps": null,
+      "stage1_suzuki_order": null
+    },
+    {
+      "stage1_method": "suzuki",
+      "train_seconds": 9.942750255111605,
+      "final_loss": 0.054969724267721176,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": 4,
+      "stage1_suzuki_order": 2
+    },
+    {
+      "stage1_method": "suzuki",
+      "train_seconds": 10.858636382035911,
+      "final_loss": 0.07573086023330688,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": 8,
+      "stage1_suzuki_order": 2
+    },
+    {
+      "stage1_method": "suzuki",
+      "train_seconds": 11.285382438916713,
+      "final_loss": 0.09802205115556717,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": 12,
+      "stage1_suzuki_order": 2
+    },
+    {
+      "stage1_method": "suzuki",
+      "train_seconds": 11.431035767309368,
+      "final_loss": 0.045396141707897186,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": 16,
+      "stage1_suzuki_order": 2
+    },
+    {
+      "stage1_method": "suzuki",
+      "train_seconds": 10.741907158866525,
+      "final_loss": 0.07660114765167236,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": 24,
+      "stage1_suzuki_order": 2
+    },
+    {
+      "stage1_method": "suzuki",
+      "train_seconds": 11.03943604696542,
+      "final_loss": 0.04065222665667534,
+      "seed": 0,
+      "stage2_method": "rk4",
+      "stage2_steps": 12,
+      "chebyshev_order": null,
+      "stage1_suzuki_steps": 32,
+      "stage1_suzuki_order": 2
+    }
+  ],
+  "target_loss": 0.06308075040578842,
+  "best_exact_state": {
+    "stage1_method": "exact_state",
+    "train_seconds": 10.461754416115582,
+    "final_loss": 0.06308075040578842,
+    "seed": 0,
+    "stage2_method": "rk4",
+    "stage2_steps": 12,
+    "chebyshev_order": null,
+    "stage1_suzuki_steps": null,
+    "stage1_suzuki_order": null
+  },
+  "best_chebyshev": {
+    "stage1_method": "chebyshev",
+    "train_seconds": 9.91535791195929,
+    "final_loss": 0.05525164306163788,
+    "seed": 0,
+    "stage2_method": "rk4",
+    "stage2_steps": 12,
+    "chebyshev_order": 128,
+    "stage1_suzuki_steps": null,
+    "stage1_suzuki_order": null
+  },
+  "best_suzuki": {
+    "stage1_method": "suzuki",
+    "train_seconds": 9.942750255111605,
+    "final_loss": 0.054969724267721176,
+    "seed": 0,
+    "stage2_method": "rk4",
+    "stage2_steps": 12,
+    "chebyshev_order": null,
+    "stage1_suzuki_steps": 4,
+    "stage1_suzuki_order": 2
+  }
+}

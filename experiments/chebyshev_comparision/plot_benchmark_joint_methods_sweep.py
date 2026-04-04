@@ -6,6 +6,21 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
+def unique_output_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+
+    stem = path.stem
+    suffix = path.suffix
+    parent = path.parent
+    idx = 1
+    while True:
+        candidate = parent / f"{stem}_{idx}{suffix}"
+        if not candidate.exists():
+            return candidate
+        idx += 1
+
+
 def load_payload(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -73,8 +88,10 @@ def plot_raw_results(payload: dict, out_path: Path) -> None:
     fig.suptitle("Joint Strategy Sweep: Raw Results", fontsize=14)
     fig.tight_layout()
     ensure_parent(out_path)
+    out_path = unique_output_path(out_path)
     fig.savefig(out_path, dpi=160)
     plt.close(fig)
+    return out_path
 
 
 def plot_best_summary(payload: dict, out_path: Path) -> None:
@@ -123,8 +140,10 @@ def plot_best_summary(payload: dict, out_path: Path) -> None:
 
     fig.tight_layout()
     ensure_parent(out_path)
+    out_path = unique_output_path(out_path)
     fig.savefig(out_path, dpi=160)
     plt.close(fig)
+    return out_path
 
 
 def main() -> None:
@@ -150,11 +169,11 @@ def main() -> None:
     raw_path = out_prefix.with_name(out_prefix.name + "_raw.png")
     summary_path = out_prefix.with_name(out_prefix.name + "_summary.png")
 
-    plot_raw_results(payload, raw_path)
-    plot_best_summary(payload, summary_path)
+    raw_saved = plot_raw_results(payload, raw_path)
+    summary_saved = plot_best_summary(payload, summary_path)
 
-    print(f"saved: {raw_path}")
-    print(f"saved: {summary_path}")
+    print(f"saved: {raw_saved}")
+    print(f"saved: {summary_saved}")
 
 
 if __name__ == "__main__":

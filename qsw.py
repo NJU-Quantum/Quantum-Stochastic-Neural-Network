@@ -104,6 +104,65 @@ def evolve_state_exact(psi0, H, T):
     return U.unsqueeze(0) @ psi0
 
 
+def evolve_state_suzuki(psi0, H, T, steps=12, order=2):
+    """
+    Suzuki splitting 纯态演化：
+        H = H_diag + H_off
+        支持偶数阶 order = 2, 4, 6, ...
+
+    当前使用经典递归构造：
+        S_{2}(dt) = exp(-i H_diag dt/2) exp(-i H_off dt) exp(-i H_diag dt/2)
+        S_{2k+2}(dt) = S_{2k}(p dt)^2 S_{2k}((1-4p)dt) S_{2k}(p dt)^2
+    """
+    if order < 2 or order % 2 != 0:
+        raise ValueError(f"Suzuki order must be an even integer >= 2, got {order}")
+
+    N = H.shape[0]
+    H_diag = torch.diag(torch.diagonal(H))
+    H_off = H - H_diag
+    dt = T / steps
+    cache = {}
+
+    def get_ops(dt_local):
+        key = float(dt_local)
+        if key not in cache:
+            U_diag_half = torch.matrix_exp((-0.5j) * H_diag * dt_local)
+            U_off = torch.matrix_exp((-1j) * H_off * dt_local)
+            cache[key] = (U_diag_half, U_off)
+        return cache[key]
+
+    def apply_s2(psi, dt_local):
+        U_diag_half, U_off = get_ops(dt_local)
+        if psi.dim() == 2:
+            psi = U_diag_half @ psi
+            psi = U_off @ psi
+            psi = U_diag_half @ psi
+            return psi
+
+        psi = U_diag_half.unsqueeze(0) @ psi
+        psi = U_off.unsqueeze(0) @ psi
+        psi = U_diag_half.unsqueeze(0) @ psi
+        return psi
+
+    def apply_suzuki_recursive(psi, dt_local, order_local):
+        if order_local == 2:
+            return apply_s2(psi, dt_local)
+
+        k = order_local // 2 - 1
+        p = 1.0 / (4.0 - 4.0 ** (1.0 / (2 * k + 1)))
+        psi = apply_suzuki_recursive(psi, p * dt_local, order_local - 2)
+        psi = apply_suzuki_recursive(psi, p * dt_local, order_local - 2)
+        psi = apply_suzuki_recursive(psi, (1.0 - 4.0 * p) * dt_local, order_local - 2)
+        psi = apply_suzuki_recursive(psi, p * dt_local, order_local - 2)
+        psi = apply_suzuki_recursive(psi, p * dt_local, order_local - 2)
+        return psi
+
+    psi = psi0
+    for _ in range(steps):
+        psi = apply_suzuki_recursive(psi, dt, order)
+    return psi
+
+
 def evolve_state_chebyshev(psi0, H, T, max_order=128, tol=1e-10):
     """
     用 Chebyshev 展开近似计算 psi(T) = exp(-i H T) psi(0)。

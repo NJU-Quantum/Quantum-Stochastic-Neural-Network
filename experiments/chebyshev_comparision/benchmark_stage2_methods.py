@@ -15,6 +15,22 @@ from data import make_circles
 from models import QSNN2D
 
 
+def unique_output_path(path_str: str) -> Path:
+    path = Path(path_str)
+    if not path.exists():
+        return path
+
+    stem = path.stem
+    suffix = path.suffix
+    parent = path.parent
+    idx = 1
+    while True:
+        candidate = parent / f"{stem}_{idx}{suffix}"
+        if not candidate.exists():
+            return candidate
+        idx += 1
+
+
 def parse_int_list(value: str) -> List[int]:
     return [int(v.strip()) for v in value.split(",") if v.strip()]
 
@@ -249,7 +265,11 @@ def main() -> None:
     parser.add_argument("--skip-forward", action="store_true")
     parser.add_argument("--skip-stage2", action="store_true")
     parser.add_argument("--skip-train", action="store_true")
-    parser.add_argument("--out", type=str, default="")
+    parser.add_argument(
+        "--out",
+        type=str,
+        default="experiments/chebyshev_comparision/benchmark_stage2_methods_results.json",
+    )
     args = parser.parse_args()
 
     device = choose_device(args.device)
@@ -329,11 +349,10 @@ def main() -> None:
             f"{payload['training']['time_ratio_rk4_to_split']:.3f}"
         )
 
-    if args.out:
-        out_path = Path(args.out)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        print(f"\nsaved: {out_path}")
+    out_path = unique_output_path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"\nsaved: {out_path}")
 
 
 if __name__ == "__main__":

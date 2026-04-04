@@ -16,6 +16,22 @@ from models import QSNN2D
 import qsw
 
 
+def unique_output_path(path_str: str) -> Path:
+    path = Path(path_str)
+    if not path.exists():
+        return path
+
+    stem = path.stem
+    suffix = path.suffix
+    parent = path.parent
+    idx = 1
+    while True:
+        candidate = parent / f"{stem}_{idx}{suffix}"
+        if not candidate.exists():
+            return candidate
+        idx += 1
+
+
 def parse_int_list(value: str) -> List[int]:
     return [int(v.strip()) for v in value.split(",") if v.strip()]
 
@@ -40,6 +56,8 @@ def build_model(
     device: torch.device,
     stage1_method: str,
     stage2_steps: int,
+    stage1_suzuki_steps: int,
+    stage1_suzuki_order: int,
     chebyshev_order: int,
     chebyshev_tol: float,
 ) -> QSNN2D:
@@ -52,6 +70,8 @@ def build_model(
         device=device,
         stage2_steps=stage2_steps,
         stage1_method=stage1_method,
+        stage1_suzuki_steps=stage1_suzuki_steps,
+        stage1_suzuki_order=stage1_suzuki_order,
         chebyshev_order=chebyshev_order,
         chebyshev_tol=chebyshev_tol,
     )
@@ -64,6 +84,8 @@ def benchmark_forward_full(
     runs: int,
     device: torch.device,
     stage2_steps: int,
+    stage1_suzuki_steps: int,
+    stage1_suzuki_order: int,
     chebyshev_order: int,
     chebyshev_tol: float,
 ) -> dict:
@@ -71,16 +93,20 @@ def benchmark_forward_full(
     torch.manual_seed(0)
 
     exact = build_model(
-        N, device, "exact", stage2_steps, chebyshev_order, chebyshev_tol
+        N, device, "exact", stage2_steps, stage1_suzuki_steps, stage1_suzuki_order, chebyshev_order, chebyshev_tol
     )
     cheb = build_model(
-        N, device, "chebyshev", stage2_steps, chebyshev_order, chebyshev_tol
+        N, device, "chebyshev", stage2_steps, stage1_suzuki_steps, stage1_suzuki_order, chebyshev_order, chebyshev_tol
+    )
+    suzuki = build_model(
+        N, device, "suzuki", stage2_steps, stage1_suzuki_steps, stage1_suzuki_order, chebyshev_order, chebyshev_tol
     )
     clone_weights(cheb, exact)
+    clone_weights(suzuki, exact)
 
     measurements = []
     outputs = {}
-    for method, model in [("exact", exact), ("chebyshev", cheb)]:
+    for method, model in [("exact", exact), ("chebyshev", cheb), ("suzuki", suzuki)]:
         model.eval()
         with torch.no_grad():
             for _ in range(warmup):
@@ -100,22 +126,26 @@ def benchmark_forward_full(
         )
         outputs[method] = (probs, rho)
 
-    prob_diff = (
-        outputs["exact"][0] - outputs["chebyshev"][0]
-    ).abs().max().item()
-    rho_diff = (
-        outputs["exact"][1] - outputs["chebyshev"][1]
-    ).abs().max().item()
+    prob_diffs = {
+        "chebyshev": (outputs["exact"][0] - outputs["chebyshev"][0]).abs().max().item(),
+        "suzuki": (outputs["exact"][0] - outputs["suzuki"][0]).abs().max().item(),
+    }
+    rho_diffs = {
+        "chebyshev": (outputs["exact"][1] - outputs["chebyshev"][1]).abs().max().item(),
+        "suzuki": (outputs["exact"][1] - outputs["suzuki"][1]).abs().max().item(),
+    }
 
     exact_t = measurements[0]["avg_forward_seconds"]
     cheb_t = measurements[1]["avg_forward_seconds"]
+    suzuki_t = measurements[2]["avg_forward_seconds"]
     return {
         "N": N,
         "batch_size": batch_size,
         "measurements": measurements,
         "time_ratio_exact_to_chebyshev": exact_t / cheb_t,
-        "max_prob_diff": prob_diff,
-        "max_rho_diff": rho_diff,
+        "time_ratio_exact_to_suzuki": exact_t / suzuki_t,
+        "max_prob_diff_to_exact": prob_diffs,
+        "max_rho_diff_to_exact": rho_diffs,
     }
 
 
@@ -125,13 +155,15 @@ def benchmark_stage1_only(
     warmup: int,
     runs: int,
     device: torch.device,
+    stage1_suzuki_steps: int,
+    stage1_suzuki_order: int,
     chebyshev_order: int,
     chebyshev_tol: float,
 ) -> dict:
     xy = torch.rand(batch_size, 2, device=device)
     torch.manual_seed(0)
     model = build_model(
-        N, device, "exact", stage2_steps=12, chebyshev_order=chebyshev_order, chebyshev_tol=chebyshev_tol
+        N, device, "exact", stage2_steps=12, stage1_suzuki_steps=stage1_suzuki_steps, stage1_suzuki_order=stage1_suzuki_order, chebyshev_order=chebyshev_order, chebyshev_tol=chebyshev_tol
     )
 
     x, y = xy[:, 0], xy[:, 1]
@@ -152,9 +184,15 @@ def benchmark_stage1_only(
         )
         return psi_u @ psi_u.mH
 
+    def run_suzuki():
+        psi_u = qsw.evolve_state_suzuki(
+            psi0, H, model.T_u, steps=stage1_suzuki_steps, order=stage1_suzuki_order
+        )
+        return psi_u @ psi_u.mH
+
     measurements = []
     outputs = {}
-    for method, fn in [("exact", run_exact), ("chebyshev", run_chebyshev)]:
+    for method, fn in [("exact", run_exact), ("chebyshev", run_chebyshev), ("suzuki", run_suzuki)]:
         with torch.no_grad():
             for _ in range(warmup):
                 rho = fn()
@@ -173,15 +211,20 @@ def benchmark_stage1_only(
         )
         outputs[method] = rho
 
-    rho_diff = (outputs["exact"] - outputs["chebyshev"]).abs().max().item()
+    rho_diffs = {
+        "chebyshev": (outputs["exact"] - outputs["chebyshev"]).abs().max().item(),
+        "suzuki": (outputs["exact"] - outputs["suzuki"]).abs().max().item(),
+    }
     exact_t = measurements[0]["avg_stage1_seconds"]
     cheb_t = measurements[1]["avg_stage1_seconds"]
+    suzuki_t = measurements[2]["avg_stage1_seconds"]
     return {
         "N": N,
         "batch_size": batch_size,
         "measurements": measurements,
         "time_ratio_exact_to_chebyshev": exact_t / cheb_t,
-        "max_rho_diff": rho_diff,
+        "time_ratio_exact_to_suzuki": exact_t / suzuki_t,
+        "max_rho_diff_to_exact": rho_diffs,
     }
 
 
@@ -190,6 +233,8 @@ def benchmark_training(
     steps: int,
     device: torch.device,
     stage2_steps: int,
+    stage1_suzuki_steps: int,
+    stage1_suzuki_order: int,
     chebyshev_order: int,
     chebyshev_tol: float,
 ) -> dict:
@@ -197,10 +242,10 @@ def benchmark_training(
     Xd, yd = X.to(device), y.to(device)
 
     results = []
-    for method in ["exact", "chebyshev"]:
+    for method in ["exact", "chebyshev", "suzuki"]:
         torch.manual_seed(0)
         model = build_model(
-            N, device, method, stage2_steps, chebyshev_order, chebyshev_tol
+            N, device, method, stage2_steps, stage1_suzuki_steps, stage1_suzuki_order, chebyshev_order, chebyshev_tol
         )
         opt = torch.optim.Adam(model.parameters(), lr=3e-2)
 
@@ -233,6 +278,9 @@ def benchmark_training(
         "time_ratio_exact_to_chebyshev": (
             results[0]["train_seconds"] / results[1]["train_seconds"]
         ),
+        "time_ratio_exact_to_suzuki": (
+            results[0]["train_seconds"] / results[2]["train_seconds"]
+        ),
     }
 
 
@@ -246,18 +294,27 @@ def print_section(title: str, rows: List[Dict], time_key: str) -> None:
             f"  time_ratio_exact_to_chebyshev="
             f"{row['time_ratio_exact_to_chebyshev']:.3f}"
         )
-        if "max_prob_diff" in row:
+        if "time_ratio_exact_to_suzuki" in row:
             print(
-                f"  max_prob_diff={row['max_prob_diff']:.3e} "
-                f"max_rho_diff={row['max_rho_diff']:.3e}"
+                f"  time_ratio_exact_to_suzuki="
+                f"{row['time_ratio_exact_to_suzuki']:.3f}"
             )
-        elif "max_rho_diff" in row:
-            print(f"  max_rho_diff={row['max_rho_diff']:.3e}")
+        if "max_prob_diff_to_exact" in row:
+            print(
+                "  max_prob_diff_to_exact="
+                f"{row['max_prob_diff_to_exact']}"
+            )
+            print(
+                "  max_rho_diff_to_exact="
+                f"{row['max_rho_diff_to_exact']}"
+            )
+        elif "max_rho_diff_to_exact" in row:
+            print(f"  max_rho_diff_to_exact={row['max_rho_diff_to_exact']}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Benchmark QSNN2D stage-1 exact_state vs chebyshev."
+        description="Benchmark QSNN2D stage-1 exact_state vs chebyshev vs suzuki."
     )
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--forward-ns", default="100,200")
@@ -269,12 +326,18 @@ def main() -> None:
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--train-steps", type=int, default=100)
     parser.add_argument("--stage2-steps", type=int, default=12)
+    parser.add_argument("--stage1-suzuki-steps", type=int, default=12)
+    parser.add_argument("--stage1-suzuki-order", type=int, default=2)
     parser.add_argument("--chebyshev-order", type=int, default=128)
     parser.add_argument("--chebyshev-tol", type=float, default=1e-10)
     parser.add_argument("--skip-forward", action="store_true")
     parser.add_argument("--skip-stage1", action="store_true")
     parser.add_argument("--skip-train", action="store_true")
-    parser.add_argument("--out", type=str, default="")
+    parser.add_argument(
+        "--out",
+        type=str,
+        default="experiments/chebyshev_comparision/benchmark_stage1_methods_results.json",
+    )
     args = parser.parse_args()
 
     device = choose_device(args.device)
@@ -290,6 +353,8 @@ def main() -> None:
             "warmup": args.warmup,
             "train_steps": args.train_steps,
             "stage2_steps": args.stage2_steps,
+            "stage1_suzuki_steps": args.stage1_suzuki_steps,
+            "stage1_suzuki_order": args.stage1_suzuki_order,
             "chebyshev_order": args.chebyshev_order,
             "chebyshev_tol": args.chebyshev_tol,
         },
@@ -310,6 +375,8 @@ def main() -> None:
                     runs=args.forward_runs,
                     device=device,
                     stage2_steps=args.stage2_steps,
+                    stage1_suzuki_steps=args.stage1_suzuki_steps,
+                    stage1_suzuki_order=args.stage1_suzuki_order,
                     chebyshev_order=args.chebyshev_order,
                     chebyshev_tol=args.chebyshev_tol,
                 )
@@ -329,6 +396,8 @@ def main() -> None:
                     warmup=args.warmup,
                     runs=args.stage1_runs,
                     device=device,
+                    stage1_suzuki_steps=args.stage1_suzuki_steps,
+                    stage1_suzuki_order=args.stage1_suzuki_order,
                     chebyshev_order=args.chebyshev_order,
                     chebyshev_tol=args.chebyshev_tol,
                 )
@@ -345,6 +414,8 @@ def main() -> None:
             steps=args.train_steps,
             device=device,
             stage2_steps=args.stage2_steps,
+            stage1_suzuki_steps=args.stage1_suzuki_steps,
+            stage1_suzuki_order=args.stage1_suzuki_order,
             chebyshev_order=args.chebyshev_order,
             chebyshev_tol=args.chebyshev_tol,
         )
@@ -363,12 +434,15 @@ def main() -> None:
             "  time_ratio_exact_to_chebyshev="
             f"{payload['training']['time_ratio_exact_to_chebyshev']:.3f}"
         )
+        print(
+            "  time_ratio_exact_to_suzuki="
+            f"{payload['training']['time_ratio_exact_to_suzuki']:.3f}"
+        )
 
-    if args.out:
-        out_path = Path(args.out)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        print(f"\nsaved: {out_path}")
+    out_path = unique_output_path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"\nsaved: {out_path}")
 
 
 if __name__ == "__main__":

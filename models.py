@@ -76,6 +76,8 @@ class QSNN2D(nn.Module):
         stage2_steps=20,
         stage2_method="rk4",
         stage1_method="exact",
+        stage1_suzuki_steps=12,
+        stage1_suzuki_order=2,
         chebyshev_order=128,
         chebyshev_tol=1e-10,
     ):
@@ -87,6 +89,8 @@ class QSNN2D(nn.Module):
         self.stage2_steps = stage2_steps
         self.stage2_method = stage2_method
         self.stage1_method = stage1_method
+        self.stage1_suzuki_steps = stage1_suzuki_steps
+        self.stage1_suzuki_order = stage1_suzuki_order
         self.chebyshev_order = chebyshev_order
         self.chebyshev_tol = chebyshev_tol
 
@@ -143,6 +147,16 @@ class QSNN2D(nn.Module):
                 self.T_u,
                 max_order=self.chebyshev_order,
                 tol=self.chebyshev_tol,
+            )
+            rho_u = psi_u @ psi_u.mH
+        elif self.stage1_method == "suzuki":
+            psi0 = self.encode_state(x, y)
+            psi_u = qsw.evolve_state_suzuki(
+                psi0,
+                H,
+                self.T_u,
+                steps=self.stage1_suzuki_steps,
+                order=self.stage1_suzuki_order,
             )
             rho_u = psi_u @ psi_u.mH
         else:

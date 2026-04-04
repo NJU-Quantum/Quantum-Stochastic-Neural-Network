@@ -1,0 +1,180 @@
+{
+  "device": "cuda",
+  "config": {
+    "forward_ns": [
+      100,
+      200
+    ],
+    "stage1_ns": [
+      100,
+      200,
+      300
+    ],
+    "train_n": 100,
+    "batch_size": 512,
+    "forward_runs": 10,
+    "stage1_runs": 20,
+    "warmup": 3,
+    "train_steps": 100,
+    "stage2_steps": 12,
+    "stage1_suzuki_steps": 12,
+    "stage1_suzuki_order": 2,
+    "chebyshev_order": 128,
+    "chebyshev_tol": 1e-10
+  },
+  "forward_full": [
+    {
+      "N": 100,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_forward_seconds": 0.09633091380819678
+        },
+        {
+          "method": "chebyshev",
+          "avg_forward_seconds": 0.0985892959870398
+        },
+        {
+          "method": "suzuki",
+          "avg_forward_seconds": 0.09308385606855155
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.9770930286474517,
+      "time_ratio_exact_to_suzuki": 1.0348831459802648,
+      "max_prob_diff_to_exact": {
+        "chebyshev": 7.152557373046875e-07,
+        "suzuki": 7.808208465576172e-06
+      },
+      "max_rho_diff_to_exact": {
+        "chebyshev": 1.080334186553955e-06,
+        "suzuki": 8.791756044956855e-06
+      }
+    },
+    {
+      "N": 200,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_forward_seconds": 0.5033345939125866
+        },
+        {
+          "method": "chebyshev",
+          "avg_forward_seconds": 0.5058919469360262
+        },
+        {
+          "method": "suzuki",
+          "avg_forward_seconds": 0.5060402691829949
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.9949448631492783,
+      "time_ratio_exact_to_suzuki": 0.9946532411841914,
+      "max_prob_diff_to_exact": {
+        "chebyshev": 2.980232238769531e-07,
+        "suzuki": 1.0192394256591797e-05
+      },
+      "max_rho_diff_to_exact": {
+        "chebyshev": 2.607704061574623e-07,
+        "suzuki": 6.333943019853905e-06
+      }
+    }
+  ],
+  "stage1_only": [
+    {
+      "N": 100,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_stage1_seconds": 0.002100753760896623
+        },
+        {
+          "method": "chebyshev",
+          "avg_stage1_seconds": 0.003171287290751934
+        },
+        {
+          "method": "suzuki",
+          "avg_stage1_seconds": 0.003227422130294144
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.66242934439362,
+      "time_ratio_exact_to_suzuki": 0.650907652016739,
+      "max_rho_diff_to_exact": {
+        "chebyshev": 3.3974647521972656e-06,
+        "suzuki": 2.5069015464396216e-05
+      }
+    },
+    {
+      "N": 200,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_stage1_seconds": 0.0023348285583779218
+        },
+        {
+          "method": "chebyshev",
+          "avg_stage1_seconds": 0.004421468405053019
+        },
+        {
+          "method": "suzuki",
+          "avg_stage1_seconds": 0.004610958648845554
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.5280663219733952,
+      "time_ratio_exact_to_suzuki": 0.506365104567245,
+      "max_rho_diff_to_exact": {
+        "chebyshev": 1.6689300537109375e-06,
+        "suzuki": 3.4943233913509175e-05
+      }
+    },
+    {
+      "N": 300,
+      "batch_size": 512,
+      "measurements": [
+        {
+          "method": "exact_state",
+          "avg_stage1_seconds": 0.0025602099951356648
+        },
+        {
+          "method": "chebyshev",
+          "avg_stage1_seconds": 0.006989753595553339
+        },
+        {
+          "method": "suzuki",
+          "avg_stage1_seconds": 0.006613019807264209
+        }
+      ],
+      "time_ratio_exact_to_chebyshev": 0.3662804360892478,
+      "time_ratio_exact_to_suzuki": 0.38714688141767684,
+      "max_rho_diff_to_exact": {
+        "chebyshev": 3.248453140258789e-06,
+        "suzuki": 4.0468152292305604e-05
+      }
+    }
+  ],
+  "training": {
+    "N": 100,
+    "steps": 100,
+    "measurements": [
+      {
+        "method": "exact_state",
+        "train_seconds": 9.219346857164055,
+        "final_loss": 0.06308075040578842
+      },
+      {
+        "method": "chebyshev",
+        "train_seconds": 9.440204849932343,
+        "final_loss": 0.05525164306163788
+      },
+      {
+        "method": "suzuki",
+        "train_seconds": 9.805627177003771,
+        "final_loss": 0.09802205115556717
+      }
+    ],
+    "time_ratio_exact_to_chebyshev": 0.9766045338762039,
+    "time_ratio_exact_to_suzuki": 0.9402098091986747
+  }
+}

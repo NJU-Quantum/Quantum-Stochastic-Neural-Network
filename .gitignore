@@ -4,3 +4,4 @@ __pycache__/
 ga_framework
 .vscode/
 *.DS_Store
+misc/

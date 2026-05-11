@@ -1,0 +1,522 @@
+{
+  "input_path": "C:\\Users\\12704\\Desktop\\研2\\Quantum-Stochastic-Neural-Network-main\\Quantum-Stochastic-Neural-Network-main\\tasks\\corpus_pipline\\tang_json",
+  "output_file": "C:\\Users\\12704\\Desktop\\研2\\Quantum-Stochastic-Neural-Network-main\\Quantum-Stochastic-Neural-Network-main\\tasks\\corpus_pipline\\tang_selected.cleaned.jsonl",
+  "generated_at_utc": "2026-05-11T08:34:52.848164+00:00",
+  "records_seen": 57607,
+  "records_kept": 12223,
+  "paragraph_count": 71463,
+  "character_count": 932226,
+  "vocab_size": 6819,
+  "average_paragraph_length": 13.0449,
+  "dropped_author": 44591,
+  "dropped_empty": 0,
+  "dropped_short": 2589,
+  "dropped_low_chinese": 13400,
+  "filters": {
+    "min_chinese_ratio": 0.8,
+    "min_chars": 4,
+    "join_paragraphs": false,
+    "author_filter_enabled": true,
+    "allowed_authors": [
+      "元稹",
+      "刘禹锡",
+      "刘长卿",
+      "孟浩然",
+      "孟郊",
+      "岑参",
+      "崔颢",
+      "张九龄",
+      "李商隐",
+      "李白",
+      "杜牧",
+      "杜甫",
+      "柳宗元",
+      "王昌龄",
+      "王维",
+      "白居易",
+      "贺知章",
+      "韩愈",
+      "高适"
+    ]
+  },
+  "author_counts": [
+    {
+      "author": "白居易",
+      "count": 3002
+    },
+    {
+      "author": "杜甫",
+      "count": 1489
+    },
+    {
+      "author": "李白",
+      "count": 1204
+    },
+    {
+      "author": "元稹",
+      "count": 908
+    },
+    {
+      "author": "刘禹锡",
+      "count": 886
+    },
+    {
+      "author": "李商隐",
+      "count": 615
+    },
+    {
+      "author": "杜牧",
+      "count": 542
+    },
+    {
+      "author": "孟郊",
+      "count": 532
+    },
+    {
+      "author": "刘长卿",
+      "count": 531
+    },
+    {
+      "author": "韩愈",
+      "count": 439
+    },
+    {
+      "author": "岑参",
+      "count": 411
+    },
+    {
+      "author": "王维",
+      "count": 403
+    },
+    {
+      "author": "孟浩然",
+      "count": 273
+    },
+    {
+      "author": "高适",
+      "count": 268
+    },
+    {
+      "author": "张九龄",
+      "count": 223
+    },
+    {
+      "author": "王昌龄",
+      "count": 219
+    },
+    {
+      "author": "柳宗元",
+      "count": 194
+    },
+    {
+      "author": "崔颢",
+      "count": 59
+    },
+    {
+      "author": "贺知章",
+      "count": 25
+    }
+  ],
+  "high_frequency_characters": [
+    {
+      "char": "，",
+      "count": 71843
+    },
+    {
+      "char": "。",
+      "count": 71360
+    },
+    {
+      "char": "不",
+      "count": 8886
+    },
+    {
+      "char": "人",
+      "count": 6549
+    },
+    {
+      "char": "无",
+      "count": 5090
+    },
+    {
+      "char": "一",
+      "count": 4843
+    },
+    {
+      "char": "日",
+      "count": 4560
+    },
+    {
+      "char": "有",
+      "count": 4384
+    },
+    {
+      "char": "风",
+      "count": 4301
+    },
+    {
+      "char": "何",
+      "count": 4285
+    },
+    {
+      "char": "山",
+      "count": 4206
+    },
+    {
+      "char": "来",
+      "count": 3757
+    },
+    {
+      "char": "天",
+      "count": 3722
+    },
+    {
+      "char": "君",
+      "count": 3607
+    },
+    {
+      "char": "时",
+      "count": 3561
+    },
+    {
+      "char": "云",
+      "count": 3560
+    },
+    {
+      "char": "为",
+      "count": 3440
+    },
+    {
+      "char": "中",
+      "count": 3344
+    },
+    {
+      "char": "相",
+      "count": 3286
+    },
+    {
+      "char": "水",
+      "count": 3224
+    },
+    {
+      "char": "春",
+      "count": 3066
+    },
+    {
+      "char": "上",
+      "count": 3017
+    },
+    {
+      "char": "白",
+      "count": 3006
+    },
+    {
+      "char": "生",
+      "count": 2978
+    },
+    {
+      "char": "如",
+      "count": 2914
+    },
+    {
+      "char": "月",
+      "count": 2895
+    },
+    {
+      "char": "心",
+      "count": 2796
+    },
+    {
+      "char": "自",
+      "count": 2783
+    },
+    {
+      "char": "花",
+      "count": 2781
+    },
+    {
+      "char": "年",
+      "count": 2761
+    },
+    {
+      "char": "长",
+      "count": 2688
+    },
+    {
+      "char": "此",
+      "count": 2640
+    },
+    {
+      "char": "我",
+      "count": 2613
+    },
+    {
+      "char": "知",
+      "count": 2508
+    },
+    {
+      "char": "江",
+      "count": 2506
+    },
+    {
+      "char": "行",
+      "count": 2498
+    },
+    {
+      "char": "去",
+      "count": 2418
+    },
+    {
+      "char": "见",
+      "count": 2353
+    },
+    {
+      "char": "归",
+      "count": 2328
+    },
+    {
+      "char": "下",
+      "count": 2242
+    },
+    {
+      "char": "秋",
+      "count": 2234
+    },
+    {
+      "char": "得",
+      "count": 2182
+    },
+    {
+      "char": "未",
+      "count": 2180
+    },
+    {
+      "char": "在",
+      "count": 2156
+    },
+    {
+      "char": "高",
+      "count": 2122
+    },
+    {
+      "char": "子",
+      "count": 2102
+    },
+    {
+      "char": "青",
+      "count": 2078
+    },
+    {
+      "char": "今",
+      "count": 2075
+    },
+    {
+      "char": "清",
+      "count": 2069
+    },
+    {
+      "char": "多",
+      "count": 2044
+    },
+    {
+      "char": "与",
+      "count": 2041
+    },
+    {
+      "char": "夜",
+      "count": 1984
+    },
+    {
+      "char": "三",
+      "count": 1973
+    },
+    {
+      "char": "门",
+      "count": 1967
+    },
+    {
+      "char": "空",
+      "count": 1953
+    },
+    {
+      "char": "明",
+      "count": 1926
+    },
+    {
+      "char": "里",
+      "count": 1915
+    },
+    {
+      "char": "事",
+      "count": 1878
+    },
+    {
+      "char": "客",
+      "count": 1858
+    },
+    {
+      "char": "万",
+      "count": 1850
+    },
+    {
+      "char": "酒",
+      "count": 1818
+    },
+    {
+      "char": "朝",
+      "count": 1806
+    },
+    {
+      "char": "道",
+      "count": 1792
+    },
+    {
+      "char": "东",
+      "count": 1792
+    },
+    {
+      "char": "马",
+      "count": 1786
+    },
+    {
+      "char": "可",
+      "count": 1785
+    },
+    {
+      "char": "南",
+      "count": 1773
+    },
+    {
+      "char": "老",
+      "count": 1756
+    },
+    {
+      "char": "落",
+      "count": 1752
+    },
+    {
+      "char": "是",
+      "count": 1741
+    },
+    {
+      "char": "前",
+      "count": 1688
+    },
+    {
+      "char": "已",
+      "count": 1682
+    },
+    {
+      "char": "家",
+      "count": 1681
+    },
+    {
+      "char": "金",
+      "count": 1668
+    },
+    {
+      "char": "千",
+      "count": 1663
+    },
+    {
+      "char": "出",
+      "count": 1654
+    },
+    {
+      "char": "处",
+      "count": 1620
+    },
+    {
+      "char": "身",
+      "count": 1619
+    },
+    {
+      "char": "西",
+      "count": 1618
+    },
+    {
+      "char": "城",
+      "count": 1609
+    },
+    {
+      "char": "声",
+      "count": 1608
+    },
+    {
+      "char": "欲",
+      "count": 1592
+    },
+    {
+      "char": "远",
+      "count": 1576
+    },
+    {
+      "char": "地",
+      "count": 1569
+    },
+    {
+      "char": "寒",
+      "count": 1561
+    },
+    {
+      "char": "新",
+      "count": 1543
+    },
+    {
+      "char": "开",
+      "count": 1527
+    },
+    {
+      "char": "飞",
+      "count": 1516
+    },
+    {
+      "char": "尽",
+      "count": 1505
+    },
+    {
+      "char": "草",
+      "count": 1499
+    },
+    {
+      "char": "谁",
+      "count": 1489
+    },
+    {
+      "char": "深",
+      "count": 1483
+    },
+    {
+      "char": "闻",
+      "count": 1479
+    },
+    {
+      "char": "将",
+      "count": 1474
+    },
+    {
+      "char": "入",
+      "count": 1467
+    },
+    {
+      "char": "玉",
+      "count": 1464
+    },
+    {
+      "char": "流",
+      "count": 1451
+    },
+    {
+      "char": "别",
+      "count": 1441
+    },
+    {
+      "char": "复",
+      "count": 1432
+    },
+    {
+      "char": "独",
+      "count": 1430
+    }
+  ]
+}

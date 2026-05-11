@@ -1,0 +1,4421 @@
+{
+  "input_file": "C:\\Users\\12704\\Desktop\\研2\\Quantum-Stochastic-Neural-Network-main\\Quantum-Stochastic-Neural-Network-main\\tasks\\corpus_pipline\\tang_selected.cleaned.jsonl",
+  "output_file": "C:\\Users\\12704\\Desktop\\研2\\Quantum-Stochastic-Neural-Network-main\\Quantum-Stochastic-Neural-Network-main\\tasks\\corpus_pipline\\tang_selected.lf1000.filtered.jsonl",
+  "generated_at_utc": "2026-05-11T08:51:39.310414+00:00",
+  "field": "text",
+  "bottom_k": 1000,
+  "han_only": true,
+  "records_seen": 71463,
+  "records_kept": 70556,
+  "records_dropped": 907,
+  "characters_before": 788422,
+  "characters_after": 778330,
+  "vocab_size_before": 6724,
+  "vocab_size_after": 5715,
+  "average_length_before": 11.0326,
+  "average_length_after": 11.0314,
+  "low_frequency_characters": [
+    {
+      "char": "㑹",
+      "count": 1
+    },
+    {
+      "char": "㓤",
+      "count": 1
+    },
+    {
+      "char": "㕭",
+      "count": 1
+    },
+    {
+      "char": "㗌",
+      "count": 1
+    },
+    {
+      "char": "㛂",
+      "count": 1
+    },
+    {
+      "char": "㛠",
+      "count": 1
+    },
+    {
+      "char": "㟅",
+      "count": 1
+    },
+    {
+      "char": "㠢",
+      "count": 1
+    },
+    {
+      "char": "㠾",
+      "count": 1
+    },
+    {
+      "char": "㦨",
+      "count": 1
+    },
+    {
+      "char": "㧞",
+      "count": 1
+    },
+    {
+      "char": "㨖",
+      "count": 1
+    },
+    {
+      "char": "㨝",
+      "count": 1
+    },
+    {
+      "char": "㩦",
+      "count": 1
+    },
+    {
+      "char": "㰤",
+      "count": 1
+    },
+    {
+      "char": "㱥",
+      "count": 1
+    },
+    {
+      "char": "㲉",
+      "count": 1
+    },
+    {
+      "char": "㲚",
+      "count": 1
+    },
+    {
+      "char": "㴩",
+      "count": 1
+    },
+    {
+      "char": "㵝",
+      "count": 1
+    },
+    {
+      "char": "㼚",
+      "count": 1
+    },
+    {
+      "char": "㽅",
+      "count": 1
+    },
+    {
+      "char": "㿉",
+      "count": 1
+    },
+    {
+      "char": "䀣",
+      "count": 1
+    },
+    {
+      "char": "䁔",
+      "count": 1
+    },
+    {
+      "char": "䂓",
+      "count": 1
+    },
+    {
+      "char": "䃸",
+      "count": 1
+    },
+    {
+      "char": "䆗",
+      "count": 1
+    },
+    {
+      "char": "䈴",
+      "count": 1
+    },
+    {
+      "char": "䌷",
+      "count": 1
+    },
+    {
+      "char": "䍀",
+      "count": 1
+    },
+    {
+      "char": "䒠",
+      "count": 1
+    },
+    {
+      "char": "䓨",
+      "count": 1
+    },
+    {
+      "char": "䓬",
+      "count": 1
+    },
+    {
+      "char": "䔿",
+      "count": 1
+    },
+    {
+      "char": "䕓",
+      "count": 1
+    },
+    {
+      "char": "䕭",
+      "count": 1
+    },
+    {
+      "char": "䗖",
+      "count": 1
+    },
+    {
+      "char": "䙀",
+      "count": 1
+    },
+    {
+      "char": "䛠",
+      "count": 1
+    },
+    {
+      "char": "䜣",
+      "count": 1
+    },
+    {
+      "char": "䡴",
+      "count": 1
+    },
+    {
+      "char": "䦱",
+      "count": 1
+    },
+    {
+      "char": "䪜",
+      "count": 1
+    },
+    {
+      "char": "䫇",
+      "count": 1
+    },
+    {
+      "char": "䬴",
+      "count": 1
+    },
+    {
+      "char": "䮂",
+      "count": 1
+    },
+    {
+      "char": "䮧",
+      "count": 1
+    },
+    {
+      "char": "䰃",
+      "count": 1
+    },
+    {
+      "char": "䰔",
+      "count": 1
+    },
+    {
+      "char": "䱜",
+      "count": 1
+    },
+    {
+      "char": "䳒",
+      "count": 1
+    },
+    {
+      "char": "䳟",
+      "count": 1
+    },
+    {
+      "char": "䴥",
+      "count": 1
+    },
+    {
+      "char": "䶪",
+      "count": 1
+    },
+    {
+      "char": "丐",
+      "count": 1
+    },
+    {
+      "char": "丙",
+      "count": 1
+    },
+    {
+      "char": "丳",
+      "count": 1
+    },
+    {
+      "char": "乣",
+      "count": 1
+    },
+    {
+      "char": "仔",
+      "count": 1
+    },
+    {
+      "char": "仚",
+      "count": 1
+    },
+    {
+      "char": "仳",
+      "count": 1
+    },
+    {
+      "char": "伃",
+      "count": 1
+    },
+    {
+      "char": "佁",
+      "count": 1
+    },
+    {
+      "char": "佝",
+      "count": 1
+    },
+    {
+      "char": "佥",
+      "count": 1
+    },
+    {
+      "char": "佶",
+      "count": 1
+    },
+    {
+      "char": "佺",
+      "count": 1
+    },
+    {
+      "char": "佽",
+      "count": 1
+    },
+    {
+      "char": "侄",
+      "count": 1
+    },
+    {
+      "char": "俙",
+      "count": 1
+    },
+    {
+      "char": "俩",
+      "count": 1
+    },
+    {
+      "char": "倅",
+      "count": 1
+    },
+    {
+      "char": "倕",
+      "count": 1
+    },
+    {
+      "char": "倢",
+      "count": 1
+    },
+    {
+      "char": "倥",
+      "count": 1
+    },
+    {
+      "char": "倨",
+      "count": 1
+    },
+    {
+      "char": "偁",
+      "count": 1
+    },
+    {
+      "char": "偓",
+      "count": 1
+    },
+    {
+      "char": "偬",
+      "count": 1
+    },
+    {
+      "char": "傈",
+      "count": 1
+    },
+    {
+      "char": "僁",
+      "count": 1
+    },
+    {
+      "char": "僇",
+      "count": 1
+    },
+    {
+      "char": "僛",
+      "count": 1
+    },
+    {
+      "char": "僜",
+      "count": 1
+    },
+    {
+      "char": "僦",
+      "count": 1
+    },
+    {
+      "char": "僬",
+      "count": 1
+    },
+    {
+      "char": "僰",
+      "count": 1
+    },
+    {
+      "char": "僴",
+      "count": 1
+    },
+    {
+      "char": "僾",
+      "count": 1
+    },
+    {
+      "char": "儚",
+      "count": 1
+    },
+    {
+      "char": "儛",
+      "count": 1
+    },
+    {
+      "char": "儵",
+      "count": 1
+    },
+    {
+      "char": "兑",
+      "count": 1
+    },
+    {
+      "char": "冁",
+      "count": 1
+    },
+    {
+      "char": "凘",
+      "count": 1
+    },
+    {
+      "char": "凟",
+      "count": 1
+    },
+    {
+      "char": "凹",
+      "count": 1
+    },
+    {
+      "char": "刌",
+      "count": 1
+    },
+    {
+      "char": "刜",
+      "count": 1
+    },
+    {
+      "char": "刦",
+      "count": 1
+    },
+    {
+      "char": "刲",
+      "count": 1
+    },
+    {
+      "char": "券",
+      "count": 1
+    },
+    {
+      "char": "剁",
+      "count": 1
+    },
+    {
+      "char": "剂",
+      "count": 1
+    },
+    {
+      "char": "剏",
+      "count": 1
+    },
+    {
+      "char": "剞",
+      "count": 1
+    },
+    {
+      "char": "剟",
+      "count": 1
+    },
+    {
+      "char": "劂",
+      "count": 1
+    },
+    {
+      "char": "劭",
+      "count": 1
+    },
+    {
+      "char": "勖",
+      "count": 1
+    },
+    {
+      "char": "勠",
+      "count": 1
+    },
+    {
+      "char": "匊",
+      "count": 1
+    },
+    {
+      "char": "匌",
+      "count": 1
+    },
+    {
+      "char": "卺",
+      "count": 1
+    },
+    {
+      "char": "厝",
+      "count": 1
+    },
+    {
+      "char": "叆",
+      "count": 1
+    },
+    {
+      "char": "叇",
+      "count": 1
+    },
+    {
+      "char": "叚",
+      "count": 1
+    },
+    {
+      "char": "叮",
+      "count": 1
+    },
+    {
+      "char": "吭",
+      "count": 1
+    },
+    {
+      "char": "吰",
+      "count": 1
+    },
+    {
+      "char": "吷",
+      "count": 1
+    },
+    {
+      "char": "吺",
+      "count": 1
+    },
+    {
+      "char": "呃",
+      "count": 1
+    },
+    {
+      "char": "呗",
+      "count": 1
+    },
+    {
+      "char": "呙",
+      "count": 1
+    },
+    {
+      "char": "呞",
+      "count": 1
+    },
+    {
+      "char": "呰",
+      "count": 1
+    },
+    {
+      "char": "咈",
+      "count": 1
+    },
+    {
+      "char": "咛",
+      "count": 1
+    },
+    {
+      "char": "咢",
+      "count": 1
+    },
+    {
+      "char": "咲",
+      "count": 1
+    },
+    {
+      "char": "咷",
+      "count": 1
+    },
+    {
+      "char": "咻",
+      "count": 1
+    },
+    {
+      "char": "哜",
+      "count": 1
+    },
+    {
+      "char": "哤",
+      "count": 1
+    },
+    {
+      "char": "唁",
+      "count": 1
+    },
+    {
+      "char": "唅",
+      "count": 1
+    },
+    {
+      "char": "唔",
+      "count": 1
+    },
+    {
+      "char": "唶",
+      "count": 1
+    },
+    {
+      "char": "唼",
+      "count": 1
+    },
+    {
+      "char": "唽",
+      "count": 1
+    },
+    {
+      "char": "啀",
+      "count": 1
+    },
+    {
+      "char": "啨",
+      "count": 1
+    },
+    {
+      "char": "喢",
+      "count": 1
+    },
+    {
+      "char": "嗁",
+      "count": 1
+    },
+    {
+      "char": "嗄",
+      "count": 1
+    },
+    {
+      "char": "嗥",
+      "count": 1
+    },
+    {
+      "char": "嘑",
+      "count": 1
+    },
+    {
+      "char": "嘬",
+      "count": 1
+    },
+    {
+      "char": "嘴",
+      "count": 1
+    },
+    {
+      "char": "嘷",
+      "count": 1
+    },
+    {
+      "char": "嘼",
+      "count": 1
+    },
+    {
+      "char": "噌",
+      "count": 1
+    },
+    {
+      "char": "噍",
+      "count": 1
+    },
+    {
+      "char": "噏",
+      "count": 1
+    },
+    {
+      "char": "噣",
+      "count": 1
+    },
+    {
+      "char": "噩",
+      "count": 1
+    },
+    {
+      "char": "噱",
+      "count": 1
+    },
+    {
+      "char": "嚄",
+      "count": 1
+    },
+    {
+      "char": "嚱",
+      "count": 1
+    },
+    {
+      "char": "嚵",
+      "count": 1
+    },
+    {
+      "char": "囐",
+      "count": 1
+    },
+    {
+      "char": "囱",
+      "count": 1
+    },
+    {
+      "char": "圿",
+      "count": 1
+    },
+    {
+      "char": "坨",
+      "count": 1
+    },
+    {
+      "char": "坲",
+      "count": 1
+    },
+    {
+      "char": "垛",
+      "count": 1
+    },
+    {
+      "char": "垡",
+      "count": 1
+    },
+    {
+      "char": "垲",
+      "count": 1
+    },
+    {
+      "char": "埇",
+      "count": 1
+    },
+    {
+      "char": "埏",
+      "count": 1
+    },
+    {
+      "char": "埴",
+      "count": 1
+    },
+    {
+      "char": "埶",
+      "count": 1
+    },
+    {
+      "char": "埿",
+      "count": 1
+    },
+    {
+      "char": "堌",
+      "count": 1
+    },
+    {
+      "char": "堛",
+      "count": 1
+    },
+    {
+      "char": "堮",
+      "count": 1
+    },
+    {
+      "char": "塈",
+      "count": 1
+    },
+    {
+      "char": "墍",
+      "count": 1
+    },
+    {
+      "char": "墐",
+      "count": 1
+    },
+    {
+      "char": "墺",
+      "count": 1
+    },
+    {
+      "char": "壥",
+      "count": 1
+    },
+    {
+      "char": "奂",
+      "count": 1
+    },
+    {
+      "char": "奎",
+      "count": 1
+    },
+    {
+      "char": "奡",
+      "count": 1
+    },
+    {
+      "char": "奭",
+      "count": 1
+    },
+    {
+      "char": "奰",
+      "count": 1
+    },
+    {
+      "char": "妠",
+      "count": 1
+    },
+    {
+      "char": "妷",
+      "count": 1
+    },
+    {
+      "char": "姆",
+      "count": 1
+    },
+    {
+      "char": "姉",
+      "count": 1
+    },
+    {
+      "char": "姞",
+      "count": 1
+    },
+    {
+      "char": "姤",
+      "count": 1
+    },
+    {
+      "char": "姱",
+      "count": 1
+    },
+    {
+      "char": "娀",
+      "count": 1
+    },
+    {
+      "char": "娴",
+      "count": 1
+    },
+    {
+      "char": "婐",
+      "count": 1
+    },
+    {
+      "char": "婗",
+      "count": 1
+    },
+    {
+      "char": "婠",
+      "count": 1
+    },
+    {
+      "char": "婪",
+      "count": 1
+    },
+    {
+      "char": "婬",
+      "count": 1
+    },
+    {
+      "char": "媕",
+      "count": 1
+    },
+    {
+      "char": "媪",
+      "count": 1
+    },
+    {
+      "char": "媮",
+      "count": 1
+    },
+    {
+      "char": "嫇",
+      "count": 1
+    },
+    {
+      "char": "嫈",
+      "count": 1
+    },
+    {
+      "char": "嫜",
+      "count": 1
+    },
+    {
+      "char": "嫪",
+      "count": 1
+    },
+    {
+      "char": "嫮",
+      "count": 1
+    },
+    {
+      "char": "嫱",
+      "count": 1
+    },
+    {
+      "char": "宷",
+      "count": 1
+    },
+    {
+      "char": "寖",
+      "count": 1
+    },
+    {
+      "char": "尨",
+      "count": 1
+    },
+    {
+      "char": "尫",
+      "count": 1
+    },
+    {
+      "char": "屃",
+      "count": 1
+    },
+    {
+      "char": "岗",
+      "count": 1
+    },
+    {
+      "char": "峃",
+      "count": 1
+    },
+    {
+      "char": "峞",
+      "count": 1
+    },
+    {
+      "char": "崴",
+      "count": 1
+    },
+    {
+      "char": "嵷",
+      "count": 1
+    },
+    {
+      "char": "嵸",
+      "count": 1
+    },
+    {
+      "char": "嶫",
+      "count": 1
+    },
+    {
+      "char": "嶱",
+      "count": 1
+    },
+    {
+      "char": "巓",
+      "count": 1
+    },
+    {
+      "char": "巽",
+      "count": 1
+    },
+    {
+      "char": "币",
+      "count": 1
+    },
+    {
+      "char": "帑",
+      "count": 1
+    },
+    {
+      "char": "帓",
+      "count": 1
+    },
+    {
+      "char": "帢",
+      "count": 1
+    },
+    {
+      "char": "帤",
+      "count": 1
+    },
+    {
+      "char": "帱",
+      "count": 1
+    },
+    {
+      "char": "幪",
+      "count": 1
+    },
+    {
+      "char": "幮",
+      "count": 1
+    },
+    {
+      "char": "庥",
+      "count": 1
+    },
+    {
+      "char": "庨",
+      "count": 1
+    },
+    {
+      "char": "廖",
+      "count": 1
+    },
+    {
+      "char": "廥",
+      "count": 1
+    },
+    {
+      "char": "廼",
+      "count": 1
+    },
+    {
+      "char": "弝",
+      "count": 1
+    },
+    {
+      "char": "弨",
+      "count": 1
+    },
+    {
+      "char": "弮",
+      "count": 1
+    },
+    {
+      "char": "弸",
+      "count": 1
+    },
+    {
+      "char": "彍",
+      "count": 1
+    },
+    {
+      "char": "彯",
+      "count": 1
+    },
+    {
+      "char": "徃",
+      "count": 1
+    },
+    {
+      "char": "徉",
+      "count": 1
+    },
+    {
+      "char": "徕",
+      "count": 1
+    },
+    {
+      "char": "徜",
+      "count": 1
+    },
+    {
+      "char": "徯",
+      "count": 1
+    },
+    {
+      "char": "忭",
+      "count": 1
+    },
+    {
+      "char": "忲",
+      "count": 1
+    },
+    {
+      "char": "怊",
+      "count": 1
+    },
+    {
+      "char": "怍",
+      "count": 1
+    },
+    {
+      "char": "怐",
+      "count": 1
+    },
+    {
+      "char": "怩",
+      "count": 1
+    },
+    {
+      "char": "恌",
+      "count": 1
+    },
+    {
+      "char": "恟",
+      "count": 1
+    },
+    {
+      "char": "恠",
+      "count": 1
+    },
+    {
+      "char": "恪",
+      "count": 1
+    },
+    {
+      "char": "您",
+      "count": 1
+    },
+    {
+      "char": "悫",
+      "count": 1
+    },
+    {
+      "char": "悸",
+      "count": 1
+    },
+    {
+      "char": "惉",
+      "count": 1
+    },
+    {
+      "char": "惙",
+      "count": 1
+    },
+    {
+      "char": "愎",
+      "count": 1
+    },
+    {
+      "char": "愗",
+      "count": 1
+    },
+    {
+      "char": "愞",
+      "count": 1
+    },
+    {
+      "char": "慆",
+      "count": 1
+    },
+    {
+      "char": "慜",
+      "count": 1
+    },
+    {
+      "char": "慴",
+      "count": 1
+    },
+    {
+      "char": "憃",
+      "count": 1
+    },
+    {
+      "char": "憘",
+      "count": 1
+    },
+    {
+      "char": "憨",
+      "count": 1
+    },
+    {
+      "char": "憺",
+      "count": 1
+    },
+    {
+      "char": "懈",
+      "count": 1
+    },
+    {
+      "char": "懋",
+      "count": 1
+    },
+    {
+      "char": "懜",
+      "count": 1
+    },
+    {
+      "char": "戃",
+      "count": 1
+    },
+    {
+      "char": "戞",
+      "count": 1
+    },
+    {
+      "char": "戳",
+      "count": 1
+    },
+    {
+      "char": "扛",
+      "count": 1
+    },
+    {
+      "char": "扠",
+      "count": 1
+    },
+    {
+      "char": "扴",
+      "count": 1
+    },
+    {
+      "char": "抏",
+      "count": 1
+    },
+    {
+      "char": "抔",
+      "count": 1
+    },
+    {
+      "char": "抶",
+      "count": 1
+    },
+    {
+      "char": "拇",
+      "count": 1
+    },
+    {
+      "char": "拌",
+      "count": 1
+    },
+    {
+      "char": "拕",
+      "count": 1
+    },
+    {
+      "char": "拚",
+      "count": 1
+    },
+    {
+      "char": "拮",
+      "count": 1
+    },
+    {
+      "char": "拲",
+      "count": 1
+    },
+    {
+      "char": "拶",
+      "count": 1
+    },
+    {
+      "char": "挚",
+      "count": 1
+    },
+    {
+      "char": "挶",
+      "count": 1
+    },
+    {
+      "char": "捭",
+      "count": 1
+    },
+    {
+      "char": "捺",
+      "count": 1
+    },
+    {
+      "char": "捽",
+      "count": 1
+    },
+    {
+      "char": "掻",
+      "count": 1
+    },
+    {
+      "char": "揃",
+      "count": 1
+    },
+    {
+      "char": "描",
+      "count": 1
+    },
+    {
+      "char": "揲",
+      "count": 1
+    },
+    {
+      "char": "揳",
+      "count": 1
+    },
+    {
+      "char": "搂",
+      "count": 1
+    },
+    {
+      "char": "搓",
+      "count": 1
+    },
+    {
+      "char": "搢",
+      "count": 1
+    },
+    {
+      "char": "搤",
+      "count": 1
+    },
+    {
+      "char": "搨",
+      "count": 1
+    },
+    {
+      "char": "搭",
+      "count": 1
+    },
+    {
+      "char": "摎",
+      "count": 1
+    },
+    {
+      "char": "摚",
+      "count": 1
+    },
+    {
+      "char": "摸",
+      "count": 1
+    },
+    {
+      "char": "撄",
+      "count": 1
+    },
+    {
+      "char": "撙",
+      "count": 1
+    },
+    {
+      "char": "撜",
+      "count": 1
+    },
+    {
+      "char": "擿",
+      "count": 1
+    },
+    {
+      "char": "攷",
+      "count": 1
+    },
+    {
+      "char": "敔",
+      "count": 1
+    },
+    {
+      "char": "斿",
+      "count": 1
+    },
+    {
+      "char": "昈",
+      "count": 1
+    },
+    {
+      "char": "昞",
+      "count": 1
+    },
+    {
+      "char": "晬",
+      "count": 1
+    },
+    {
+      "char": "曚",
+      "count": 1
+    },
+    {
+      "char": "曽",
+      "count": 1
+    },
+    {
+      "char": "朌",
+      "count": 1
+    },
+    {
+      "char": "朏",
+      "count": 1
+    },
+    {
+      "char": "朐",
+      "count": 1
+    },
+    {
+      "char": "朘",
+      "count": 1
+    },
+    {
+      "char": "朞",
+      "count": 1
+    },
+    {
+      "char": "朣",
+      "count": 1
+    },
+    {
+      "char": "朶",
+      "count": 1
+    },
+    {
+      "char": "杈",
+      "count": 1
+    },
+    {
+      "char": "杕",
+      "count": 1
+    },
+    {
+      "char": "杻",
+      "count": 1
+    },
+    {
+      "char": "枍",
+      "count": 1
+    },
+    {
+      "char": "枏",
+      "count": 1
+    },
+    {
+      "char": "枑",
+      "count": 1
+    },
+    {
+      "char": "枘",
+      "count": 1
+    },
+    {
+      "char": "枞",
+      "count": 1
+    },
+    {
+      "char": "枮",
+      "count": 1
+    },
+    {
+      "char": "枷",
+      "count": 1
+    },
+    {
+      "char": "枸",
+      "count": 1
+    },
+    {
+      "char": "柂",
+      "count": 1
+    },
+    {
+      "char": "柈",
+      "count": 1
+    },
+    {
+      "char": "某",
+      "count": 1
+    },
+    {
+      "char": "柙",
+      "count": 1
+    },
+    {
+      "char": "柞",
+      "count": 1
+    },
+    {
+      "char": "柣",
+      "count": 1
+    },
+    {
+      "char": "柧",
+      "count": 1
+    },
+    {
+      "char": "柹",
+      "count": 1
+    },
+    {
+      "char": "栟",
+      "count": 1
+    },
+    {
+      "char": "桉",
+      "count": 1
+    },
+    {
+      "char": "桩",
+      "count": 1
+    },
+    {
+      "char": "桶",
+      "count": 1
+    },
+    {
+      "char": "桹",
+      "count": 1
+    },
+    {
+      "char": "梐",
+      "count": 1
+    },
+    {
+      "char": "梠",
+      "count": 1
+    },
+    {
+      "char": "梩",
+      "count": 1
+    },
+    {
+      "char": "棁",
+      "count": 1
+    },
+    {
+      "char": "棆",
+      "count": 1
+    },
+    {
+      "char": "棒",
+      "count": 1
+    },
+    {
+      "char": "棙",
+      "count": 1
+    },
+    {
+      "char": "棵",
+      "count": 1
+    },
+    {
+      "char": "椌",
+      "count": 1
+    },
+    {
+      "char": "椔",
+      "count": 1
+    },
+    {
+      "char": "椟",
+      "count": 1
+    },
+    {
+      "char": "椰",
+      "count": 1
+    },
+    {
+      "char": "椸",
+      "count": 1
+    },
+    {
+      "char": "椾",
+      "count": 1
+    },
+    {
+      "char": "楗",
+      "count": 1
+    },
+    {
+      "char": "楛",
+      "count": 1
+    },
+    {
+      "char": "楝",
+      "count": 1
+    },
+    {
+      "char": "楡",
+      "count": 1
+    },
+    {
+      "char": "楢",
+      "count": 1
+    },
+    {
+      "char": "楥",
+      "count": 1
+    },
+    {
+      "char": "楪",
+      "count": 1
+    },
+    {
+      "char": "楬",
+      "count": 1
+    },
+    {
+      "char": "楯",
+      "count": 1
+    },
+    {
+      "char": "榄",
+      "count": 1
+    },
+    {
+      "char": "榕",
+      "count": 1
+    },
+    {
+      "char": "榞",
+      "count": 1
+    },
+    {
+      "char": "榱",
+      "count": 1
+    },
+    {
+      "char": "槀",
+      "count": 1
+    },
+    {
+      "char": "槖",
+      "count": 1
+    },
+    {
+      "char": "様",
+      "count": 1
+    },
+    {
+      "char": "槥",
+      "count": 1
+    },
+    {
+      "char": "槩",
+      "count": 1
+    },
+    {
+      "char": "槬",
+      "count": 1
+    },
+    {
+      "char": "槱",
+      "count": 1
+    },
+    {
+      "char": "樏",
+      "count": 1
+    },
+    {
+      "char": "樾",
+      "count": 1
+    },
+    {
+      "char": "橄",
+      "count": 1
+    },
+    {
+      "char": "橑",
+      "count": 1
+    },
+    {
+      "char": "橰",
+      "count": 1
+    },
+    {
+      "char": "檎",
+      "count": 1
+    },
+    {
+      "char": "櫐",
+      "count": 1
+    },
+    {
+      "char": "欂",
+      "count": 1
+    },
+    {
+      "char": "欙",
+      "count": 1
+    },
+    {
+      "char": "欶",
+      "count": 1
+    },
+    {
+      "char": "歃",
+      "count": 1
+    },
+    {
+      "char": "歜",
+      "count": 1
+    },
+    {
+      "char": "殉",
+      "count": 1
+    },
+    {
+      "char": "殍",
+      "count": 1
+    },
+    {
+      "char": "殖",
+      "count": 1
+    },
+    {
+      "char": "毐",
+      "count": 1
+    },
+    {
+      "char": "毓",
+      "count": 1
+    },
+    {
+      "char": "毚",
+      "count": 1
+    },
+    {
+      "char": "氄",
+      "count": 1
+    },
+    {
+      "char": "汕",
+      "count": 1
+    },
+    {
+      "char": "汭",
+      "count": 1
+    },
+    {
+      "char": "沇",
+      "count": 1
+    },
+    {
+      "char": "沩",
+      "count": 1
+    },
+    {
+      "char": "泅",
+      "count": 1
+    },
+    {
+      "char": "泆",
+      "count": 1
+    },
+    {
+      "char": "泜",
+      "count": 1
+    },
+    {
+      "char": "洊",
+      "count": 1
+    },
+    {
+      "char": "洟",
+      "count": 1
+    },
+    {
+      "char": "洱",
+      "count": 1
+    },
+    {
+      "char": "洿",
+      "count": 1
+    },
+    {
+      "char": "浈",
+      "count": 1
+    },
+    {
+      "char": "浉",
+      "count": 1
+    },
+    {
+      "char": "浏",
+      "count": 1
+    },
+    {
+      "char": "浤",
+      "count": 1
+    },
+    {
+      "char": "涖",
+      "count": 1
+    },
+    {
+      "char": "涝",
+      "count": 1
+    },
+    {
+      "char": "涞",
+      "count": 1
+    },
+    {
+      "char": "涠",
+      "count": 1
+    },
+    {
+      "char": "淖",
+      "count": 1
+    },
+    {
+      "char": "淝",
+      "count": 1
+    },
+    {
+      "char": "渣",
+      "count": 1
+    },
+    {
+      "char": "湌",
+      "count": 1
+    },
+    {
+      "char": "湜",
+      "count": 1
+    },
+    {
+      "char": "湼",
+      "count": 1
+    },
+    {
+      "char": "溔",
+      "count": 1
+    },
+    {
+      "char": "溠",
+      "count": 1
+    },
+    {
+      "char": "溥",
+      "count": 1
+    },
+    {
+      "char": "溵",
+      "count": 1
+    },
+    {
+      "char": "滀",
+      "count": 1
+    },
+    {
+      "char": "滃",
+      "count": 1
+    },
+    {
+      "char": "滏",
+      "count": 1
+    },
+    {
+      "char": "滚",
+      "count": 1
+    },
+    {
+      "char": "漦",
+      "count": 1
+    },
+    {
+      "char": "漰",
+      "count": 1
+    },
+    {
+      "char": "漴",
+      "count": 1
+    },
+    {
+      "char": "漻",
+      "count": 1
+    },
+    {
+      "char": "潀",
+      "count": 1
+    },
+    {
+      "char": "潆",
+      "count": 1
+    },
+    {
+      "char": "潬",
+      "count": 1
+    },
+    {
+      "char": "澂",
+      "count": 1
+    },
+    {
+      "char": "澉",
+      "count": 1
+    },
+    {
+      "char": "澨",
+      "count": 1
+    },
+    {
+      "char": "澳",
+      "count": 1
+    },
+    {
+      "char": "澴",
+      "count": 1
+    },
+    {
+      "char": "濉",
+      "count": 1
+    },
+    {
+      "char": "濙",
+      "count": 1
+    },
+    {
+      "char": "瀄",
+      "count": 1
+    },
+    {
+      "char": "瀎",
+      "count": 1
+    },
+    {
+      "char": "瀥",
+      "count": 1
+    },
+    {
+      "char": "瀩",
+      "count": 1
+    },
+    {
+      "char": "瀴",
+      "count": 1
+    },
+    {
+      "char": "瀺",
+      "count": 1
+    },
+    {
+      "char": "灂",
+      "count": 1
+    },
+    {
+      "char": "灨",
+      "count": 1
+    },
+    {
+      "char": "炒",
+      "count": 1
+    },
+    {
+      "char": "炜",
+      "count": 1
+    },
+    {
+      "char": "焄",
+      "count": 1
+    },
+    {
+      "char": "焭",
+      "count": 1
+    },
+    {
+      "char": "焮",
+      "count": 1
+    },
+    {
+      "char": "煆",
+      "count": 1
+    },
+    {
+      "char": "煜",
+      "count": 1
+    },
+    {
+      "char": "煞",
+      "count": 1
+    },
+    {
+      "char": "煴",
+      "count": 1
+    },
+    {
+      "char": "煼",
+      "count": 1
+    },
+    {
+      "char": "煽",
+      "count": 1
+    },
+    {
+      "char": "熇",
+      "count": 1
+    },
+    {
+      "char": "熔",
+      "count": 1
+    },
+    {
+      "char": "熖",
+      "count": 1
+    },
+    {
+      "char": "熛",
+      "count": 1
+    },
+    {
+      "char": "熺",
+      "count": 1
+    },
+    {
+      "char": "燿",
+      "count": 1
+    },
+    {
+      "char": "爊",
+      "count": 1
+    },
+    {
+      "char": "爝",
+      "count": 1
+    },
+    {
+      "char": "爟",
+      "count": 1
+    },
+    {
+      "char": "爻",
+      "count": 1
+    },
+    {
+      "char": "牌",
+      "count": 1
+    },
+    {
+      "char": "牣",
+      "count": 1
+    },
+    {
+      "char": "牾",
+      "count": 1
+    },
+    {
+      "char": "犁",
+      "count": 1
+    },
+    {
+      "char": "犉",
+      "count": 1
+    },
+    {
+      "char": "犍",
+      "count": 1
+    },
+    {
+      "char": "犗",
+      "count": 1
+    },
+    {
+      "char": "狁",
+      "count": 1
+    },
+    {
+      "char": "狠",
+      "count": 1
+    },
+    {
+      "char": "狦",
+      "count": 1
+    },
+    {
+      "char": "狵",
+      "count": 1
+    },
+    {
+      "char": "狻",
+      "count": 1
+    },
+    {
+      "char": "猲",
+      "count": 1
+    },
+    {
+      "char": "猺",
+      "count": 1
+    },
+    {
+      "char": "獌",
+      "count": 1
+    },
+    {
+      "char": "玃",
+      "count": 1
+    },
+    {
+      "char": "玖",
+      "count": 1
+    },
+    {
+      "char": "玢",
+      "count": 1
+    },
+    {
+      "char": "玻",
+      "count": 1
+    },
+    {
+      "char": "珈",
+      "count": 1
+    },
+    {
+      "char": "珌",
+      "count": 1
+    },
+    {
+      "char": "珓",
+      "count": 1
+    },
+    {
+      "char": "珵",
+      "count": 1
+    },
+    {
+      "char": "珽",
+      "count": 1
+    },
+    {
+      "char": "琇",
+      "count": 1
+    },
+    {
+      "char": "琨",
+      "count": 1
+    },
+    {
+      "char": "琫",
+      "count": 1
+    },
+    {
+      "char": "瑗",
+      "count": 1
+    },
+    {
+      "char": "瑷",
+      "count": 1
+    },
+    {
+      "char": "瑾",
+      "count": 1
+    },
+    {
+      "char": "瑿",
+      "count": 1
+    },
+    {
+      "char": "璘",
+      "count": 1
+    },
+    {
+      "char": "璟",
+      "count": 1
+    },
+    {
+      "char": "瓒",
+      "count": 1
+    },
+    {
+      "char": "瓘",
+      "count": 1
+    },
+    {
+      "char": "瓤",
+      "count": 1
+    },
+    {
+      "char": "甈",
+      "count": 1
+    },
+    {
+      "char": "甋",
+      "count": 1
+    },
+    {
+      "char": "甔",
+      "count": 1
+    },
+    {
+      "char": "甤",
+      "count": 1
+    },
+    {
+      "char": "甽",
+      "count": 1
+    },
+    {
+      "char": "畇",
+      "count": 1
+    },
+    {
+      "char": "畛",
+      "count": 1
+    },
+    {
+      "char": "畯",
+      "count": 1
+    },
+    {
+      "char": "畸",
+      "count": 1
+    },
+    {
+      "char": "畺",
+      "count": 1
+    },
+    {
+      "char": "疈",
+      "count": 1
+    },
+    {
+      "char": "疥",
+      "count": 1
+    },
+    {
+      "char": "疱",
+      "count": 1
+    },
+    {
+      "char": "痁",
+      "count": 1
+    },
+    {
+      "char": "痆",
+      "count": 1
+    },
+    {
+      "char": "症",
+      "count": 1
+    },
+    {
+      "char": "痔",
+      "count": 1
+    },
+    {
+      "char": "痗",
+      "count": 1
+    },
+    {
+      "char": "痡",
+      "count": 1
+    },
+    {
+      "char": "痱",
+      "count": 1
+    },
+    {
+      "char": "瘀",
+      "count": 1
+    },
+    {
+      "char": "瘇",
+      "count": 1
+    },
+    {
+      "char": "瘉",
+      "count": 1
+    },
+    {
+      "char": "瘕",
+      "count": 1
+    },
+    {
+      "char": "瘖",
+      "count": 1
+    },
+    {
+      "char": "瘤",
+      "count": 1
+    },
+    {
+      "char": "癃",
+      "count": 1
+    },
+    {
+      "char": "癗",
+      "count": 1
+    },
+    {
+      "char": "癯",
+      "count": 1
+    },
+    {
+      "char": "皠",
+      "count": 1
+    },
+    {
+      "char": "皥",
+      "count": 1
+    },
+    {
+      "char": "皻",
+      "count": 1
+    },
+    {
+      "char": "盍",
+      "count": 1
+    },
+    {
+      "char": "盒",
+      "count": 1
+    },
+    {
+      "char": "盝",
+      "count": 1
+    },
+    {
+      "char": "盬",
+      "count": 1
+    },
+    {
+      "char": "盯",
+      "count": 1
+    },
+    {
+      "char": "眀",
+      "count": 1
+    },
+    {
+      "char": "眘",
+      "count": 1
+    },
+    {
+      "char": "眭",
+      "count": 1
+    },
+    {
+      "char": "眯",
+      "count": 1
+    },
+    {
+      "char": "眵",
+      "count": 1
+    },
+    {
+      "char": "眶",
+      "count": 1
+    },
+    {
+      "char": "睄",
+      "count": 1
+    },
+    {
+      "char": "睺",
+      "count": 1
+    },
+    {
+      "char": "瞆",
+      "count": 1
+    },
+    {
+      "char": "瞌",
+      "count": 1
+    },
+    {
+      "char": "瞍",
+      "count": 1
+    },
+    {
+      "char": "瞠",
+      "count": 1
+    },
+    {
+      "char": "瞭",
+      "count": 1
+    },
+    {
+      "char": "矕",
+      "count": 1
+    },
+    {
+      "char": "矱",
+      "count": 1
+    },
+    {
+      "char": "矹",
+      "count": 1
+    },
+    {
+      "char": "矿",
+      "count": 1
+    },
+    {
+      "char": "码",
+      "count": 1
+    },
+    {
+      "char": "砑",
+      "count": 1
+    },
+    {
+      "char": "砣",
+      "count": 1
+    },
+    {
+      "char": "砦",
+      "count": 1
+    },
+    {
+      "char": "硊",
+      "count": 1
+    },
+    {
+      "char": "硞",
+      "count": 1
+    },
+    {
+      "char": "硠",
+      "count": 1
+    },
+    {
+      "char": "硫",
+      "count": 1
+    },
+    {
+      "char": "碇",
+      "count": 1
+    },
+    {
+      "char": "碐",
+      "count": 1
+    },
+    {
+      "char": "碗",
+      "count": 1
+    },
+    {
+      "char": "碜",
+      "count": 1
+    },
+    {
+      "char": "碟",
+      "count": 1
+    },
+    {
+      "char": "碯",
+      "count": 1
+    },
+    {
+      "char": "碱",
+      "count": 1
+    },
+    {
+      "char": "磈",
+      "count": 1
+    },
+    {
+      "char": "磎",
+      "count": 1
+    },
+    {
+      "char": "磢",
+      "count": 1
+    },
+    {
+      "char": "磳",
+      "count": 1
+    },
+    {
+      "char": "磹",
+      "count": 1
+    },
+    {
+      "char": "礌",
+      "count": 1
+    },
+    {
+      "char": "礰",
+      "count": 1
+    },
+    {
+      "char": "礲",
+      "count": 1
+    },
+    {
+      "char": "祃",
+      "count": 1
+    },
+    {
+      "char": "祆",
+      "count": 1
+    },
+    {
+      "char": "祊",
+      "count": 1
+    },
+    {
+      "char": "祧",
+      "count": 1
+    },
+    {
+      "char": "禨",
+      "count": 1
+    },
+    {
+      "char": "禬",
+      "count": 1
+    },
+    {
+      "char": "秅",
+      "count": 1
+    },
+    {
+      "char": "秫",
+      "count": 1
+    },
+    {
+      "char": "秬",
+      "count": 1
+    },
+    {
+      "char": "秳",
+      "count": 1
+    },
+    {
+      "char": "秸",
+      "count": 1
+    },
+    {
+      "char": "稌",
+      "count": 1
+    },
+    {
+      "char": "稭",
+      "count": 1
+    },
+    {
+      "char": "稿",
+      "count": 1
+    },
+    {
+      "char": "穞",
+      "count": 1
+    },
+    {
+      "char": "穱",
+      "count": 1
+    },
+    {
+      "char": "窋",
+      "count": 1
+    },
+    {
+      "char": "窙",
+      "count": 1
+    },
+    {
+      "char": "窞",
+      "count": 1
+    },
+    {
+      "char": "窰",
+      "count": 1
+    },
+    {
+      "char": "窱",
+      "count": 1
+    },
+    {
+      "char": "窸",
+      "count": 1
+    },
+    {
+      "char": "窼",
+      "count": 1
+    },
+    {
+      "char": "窾",
+      "count": 1
+    },
+    {
+      "char": "竢",
+      "count": 1
+    },
+    {
+      "char": "竣",
+      "count": 1
+    },
+    {
+      "char": "笖",
+      "count": 1
+    },
+    {
+      "char": "笡",
+      "count": 1
+    },
+    {
+      "char": "笲",
+      "count": 1
+    },
+    {
+      "char": "笶",
+      "count": 1
+    },
+    {
+      "char": "笻",
+      "count": 1
+    },
+    {
+      "char": "筤",
+      "count": 1
+    },
+    {
+      "char": "筰",
+      "count": 1
+    },
+    {
+      "char": "筳",
+      "count": 1
+    },
+    {
+      "char": "箄",
+      "count": 1
+    },
+    {
+      "char": "箊",
+      "count": 1
+    },
+    {
+      "char": "箑",
+      "count": 1
+    },
+    {
+      "char": "箒",
+      "count": 1
+    },
+    {
+      "char": "箘",
+      "count": 1
+    },
+    {
+      "char": "箩",
+      "count": 1
+    },
+    {
+      "char": "箳",
+      "count": 1
+    },
+    {
+      "char": "篂",
+      "count": 1
+    },
+    {
+      "char": "篑",
+      "count": 1
+    },
+    {
+      "char": "篴",
+      "count": 1
+    },
+    {
+      "char": "簉",
+      "count": 1
+    },
+    {
+      "char": "簋",
+      "count": 1
+    },
+    {
+      "char": "簔",
+      "count": 1
+    },
+    {
+      "char": "簠",
+      "count": 1
+    },
+    {
+      "char": "籀",
+      "count": 1
+    },
+    {
+      "char": "籉",
+      "count": 1
+    },
+    {
+      "char": "籝",
+      "count": 1
+    },
+    {
+      "char": "籴",
+      "count": 1
+    },
+    {
+      "char": "籹",
+      "count": 1
+    },
+    {
+      "char": "粔",
+      "count": 1
+    },
+    {
+      "char": "粜",
+      "count": 1
+    },
+    {
+      "char": "粢",
+      "count": 1
+    },
+    {
+      "char": "糅",
+      "count": 1
+    },
+    {
+      "char": "糈",
+      "count": 1
+    },
+    {
+      "char": "紊",
+      "count": 1
+    },
+    {
+      "char": "紭",
+      "count": 1
+    },
+    {
+      "char": "絇",
+      "count": 1
+    },
+    {
+      "char": "絚",
+      "count": 1
+    },
+    {
+      "char": "綛",
+      "count": 1
+    },
+    {
+      "char": "綮",
+      "count": 1
+    },
+    {
+      "char": "縓",
+      "count": 1
+    },
+    {
+      "char": "縚",
+      "count": 1
+    },
+    {
+      "char": "縢",
+      "count": 1
+    },
+    {
+      "char": "繄",
+      "count": 1
+    },
+    {
+      "char": "繙",
+      "count": 1
+    },
+    {
+      "char": "繠",
+      "count": 1
+    },
+    {
+      "char": "繣",
+      "count": 1
+    },
+    {
+      "char": "纴",
+      "count": 1
+    },
+    {
+      "char": "纾",
+      "count": 1
+    },
+    {
+      "char": "绌",
+      "count": 1
+    },
+    {
+      "char": "绐",
+      "count": 1
+    },
+    {
+      "char": "绖",
+      "count": 1
+    },
+    {
+      "char": "绞",
+      "count": 1
+    },
+    {
+      "char": "缊",
+      "count": 1
+    },
+    {
+      "char": "缌",
+      "count": 1
+    },
+    {
+      "char": "缔",
+      "count": 1
+    },
+    {
+      "char": "缛",
+      "count": 1
+    },
+    {
+      "char": "缮",
+      "count": 1
+    },
+    {
+      "char": "缵",
+      "count": 1
+    },
+    {
+      "char": "罛",
+      "count": 1
+    },
+    {
+      "char": "罣",
+      "count": 1
+    },
+    {
+      "char": "罤",
+      "count": 1
+    },
+    {
+      "char": "罦",
+      "count": 1
+    },
+    {
+      "char": "罫",
+      "count": 1
+    },
+    {
+      "char": "罻",
+      "count": 1
+    },
+    {
+      "char": "罿",
+      "count": 1
+    },
+    {
+      "char": "羉",
+      "count": 1
+    },
+    {
+      "char": "羚",
+      "count": 1
+    },
+    {
+      "char": "羾",
+      "count": 1
+    },
+    {
+      "char": "翀",
+      "count": 1
+    },
+    {
+      "char": "翌",
+      "count": 1
+    },
+    {
+      "char": "耔",
+      "count": 1
+    },
+    {
+      "char": "聃",
+      "count": 1
+    },
+    {
+      "char": "肛",
+      "count": 1
+    },
+    {
+      "char": "肬",
+      "count": 1
+    },
+    {
+      "char": "肶",
+      "count": 1
+    },
+    {
+      "char": "胀",
+      "count": 1
+    },
+    {
+      "char": "胉",
+      "count": 1
+    },
+    {
+      "char": "胙",
+      "count": 1
+    },
+    {
+      "char": "胞",
+      "count": 1
+    },
+    {
+      "char": "胮",
+      "count": 1
+    },
+    {
+      "char": "胾",
+      "count": 1
+    },
+    {
+      "char": "脁",
+      "count": 1
+    },
+    {
+      "char": "脗",
+      "count": 1
+    },
+    {
+      "char": "腆",
+      "count": 1
+    },
+    {
+      "char": "腔",
+      "count": 1
+    },
+    {
+      "char": "腗",
+      "count": 1
+    },
+    {
+      "char": "腯",
+      "count": 1
+    },
+    {
+      "char": "腷",
+      "count": 1
+    },
+    {
+      "char": "腿",
+      "count": 1
+    },
+    {
+      "char": "膇",
+      "count": 1
+    },
+    {
+      "char": "膈",
+      "count": 1
+    },
+    {
+      "char": "膑",
+      "count": 1
+    },
+    {
+      "char": "膓",
+      "count": 1
+    },
+    {
+      "char": "膰",
+      "count": 1
+    },
+    {
+      "char": "臀",
+      "count": 1
+    },
+    {
+      "char": "臄",
+      "count": 1
+    },
+    {
+      "char": "臛",
+      "count": 1
+    },
+    {
+      "char": "臡",
+      "count": 1
+    },
+    {
+      "char": "舋",
+      "count": 1
+    },
+    {
+      "char": "舔",
+      "count": 1
+    },
+    {
+      "char": "舕",
+      "count": 1
+    },
+    {
+      "char": "舚",
+      "count": 1
+    },
+    {
+      "char": "舴",
+      "count": 1
+    },
+    {
+      "char": "艄",
+      "count": 1
+    },
+    {
+      "char": "艋",
+      "count": 1
+    },
+    {
+      "char": "艚",
+      "count": 1
+    },
+    {
+      "char": "芗",
+      "count": 1
+    },
+    {
+      "char": "芩",
+      "count": 1
+    },
+    {
+      "char": "芾",
+      "count": 1
+    },
+    {
+      "char": "苌",
+      "count": 1
+    },
+    {
+      "char": "苙",
+      "count": 1
+    },
+    {
+      "char": "苢",
+      "count": 1
+    },
+    {
+      "char": "苯",
+      "count": 1
+    },
+    {
+      "char": "苾",
+      "count": 1
+    },
+    {
+      "char": "茀",
+      "count": 1
+    },
+    {
+      "char": "茁",
+      "count": 1
+    },
+    {
+      "char": "茌",
+      "count": 1
+    },
+    {
+      "char": "茕",
+      "count": 1
+    },
+    {
+      "char": "荳",
+      "count": 1
+    },
+    {
+      "char": "莛",
+      "count": 1
+    },
+    {
+      "char": "莨",
+      "count": 1
+    },
+    {
+      "char": "莩",
+      "count": 1
+    },
+    {
+      "char": "菘",
+      "count": 1
+    },
+    {
+      "char": "菢",
+      "count": 1
+    },
+    {
+      "char": "菫",
+      "count": 1
+    },
+    {
+      "char": "萑",
+      "count": 1
+    },
+    {
+      "char": "葢",
+      "count": 1
+    },
+    {
+      "char": "蒜",
+      "count": 1
+    },
+    {
+      "char": "蒟",
+      "count": 1
+    },
+    {
+      "char": "蒻",
+      "count": 1
+    },
+    {
+      "char": "蓣",
+      "count": 1
+    },
+    {
+      "char": "蓺",
+      "count": 1
+    },
+    {
+      "char": "蔾",
+      "count": 1
+    },
+    {
+      "char": "蕞",
+      "count": 1
+    },
+    {
+      "char": "蕡",
+      "count": 1
+    },
+    {
+      "char": "蕬",
+      "count": 1
+    },
+    {
+      "char": "蕸",
+      "count": 1
+    },
+    {
+      "char": "薋",
+      "count": 1
+    },
+    {
+      "char": "薍",
+      "count": 1
+    },
+    {
+      "char": "薫",
+      "count": 1
+    },
+    {
+      "char": "薯",
+      "count": 1
+    },
+    {
+      "char": "薲",
+      "count": 1
+    },
+    {
+      "char": "薾",
+      "count": 1
+    },
+    {
+      "char": "藐",
+      "count": 1
+    },
+    {
+      "char": "藑",
+      "count": 1
+    },
+    {
+      "char": "藟",
+      "count": 1
+    },
+    {
+      "char": "藨",
+      "count": 1
+    },
+    {
+      "char": "蘯",
+      "count": 1
+    },
+    {
+      "char": "虀",
+      "count": 1
+    },
+    {
+      "char": "虙",
+      "count": 1
+    },
+    {
+      "char": "虥",
+      "count": 1
+    },
+    {
+      "char": "蚏",
+      "count": 1
+    },
+    {
+      "char": "蚝",
+      "count": 1
+    },
+    {
+      "char": "蚨",
+      "count": 1
+    },
+    {
+      "char": "蚳",
+      "count": 1
+    },
+    {
+      "char": "蚴",
+      "count": 1
+    },
+    {
+      "char": "蛉",
+      "count": 1
+    },
+    {
+      "char": "蛑",
+      "count": 1
+    },
+    {
+      "char": "蛜",
+      "count": 1
+    },
+    {
+      "char": "蛴",
+      "count": 1
+    },
+    {
+      "char": "蛷",
+      "count": 1
+    },
+    {
+      "char": "蛹",
+      "count": 1
+    },
+    {
+      "char": "蜇",
+      "count": 1
+    },
+    {
+      "char": "蜋",
+      "count": 1
+    },
+    {
+      "char": "蜨",
+      "count": 1
+    },
+    {
+      "char": "蜯",
+      "count": 1
+    },
+    {
+      "char": "蜾",
+      "count": 1
+    },
+    {
+      "char": "蝌",
+      "count": 1
+    },
+    {
+      "char": "蝛",
+      "count": 1
+    },
+    {
+      "char": "蝝",
+      "count": 1
+    },
+    {
+      "char": "蝱",
+      "count": 1
+    },
+    {
+      "char": "蝾",
+      "count": 1
+    },
+    {
+      "char": "螂",
+      "count": 1
+    },
+    {
+      "char": "螓",
+      "count": 1
+    },
+    {
+      "char": "螖",
+      "count": 1
+    },
+    {
+      "char": "螘",
+      "count": 1
+    },
+    {
+      "char": "蟉",
+      "count": 1
+    },
+    {
+      "char": "蟚",
+      "count": 1
+    },
+    {
+      "char": "蟛",
+      "count": 1
+    },
+    {
+      "char": "蟨",
+      "count": 1
+    },
+    {
+      "char": "蠋",
+      "count": 1
+    },
+    {
+      "char": "蠚",
+      "count": 1
+    },
+    {
+      "char": "蠧",
+      "count": 1
+    },
+    {
+      "char": "衂",
+      "count": 1
+    },
+    {
+      "char": "衉",
+      "count": 1
+    },
+    {
+      "char": "衎",
+      "count": 1
+    },
+    {
+      "char": "衹",
+      "count": 1
+    },
+    {
+      "char": "袚",
+      "count": 1
+    },
+    {
+      "char": "袠",
+      "count": 1
+    },
+    {
+      "char": "袤",
+      "count": 1
+    },
+    {
+      "char": "裆",
+      "count": 1
+    },
+    {
+      "char": "裈",
+      "count": 1
+    },
+    {
+      "char": "裓",
+      "count": 1
+    },
+    {
+      "char": "裤",
+      "count": 1
+    },
+    {
+      "char": "裩",
+      "count": 1
+    },
+    {
+      "char": "裸",
+      "count": 1
+    },
+    {
+      "char": "褎",
+      "count": 1
+    },
+    {
+      "char": "褏",
+      "count": 1
+    },
+    {
+      "char": "褕",
+      "count": 1
+    },
+    {
+      "char": "褣",
+      "count": 1
+    },
+    {
+      "char": "褪",
+      "count": 1
+    },
+    {
+      "char": "褵",
+      "count": 1
+    },
+    {
+      "char": "褾",
+      "count": 1
+    },
+    {
+      "char": "襻",
+      "count": 1
+    },
+    {
+      "char": "覉",
+      "count": 1
+    },
+    {
+      "char": "觑",
+      "count": 1
+    },
+    {
+      "char": "觧",
+      "count": 1
+    },
+    {
+      "char": "觫",
+      "count": 1
+    },
+    {
+      "char": "觰",
+      "count": 1
+    },
+    {
+      "char": "觳",
+      "count": 1
+    },
+    {
+      "char": "訧",
+      "count": 1
+    },
+    {
+      "char": "詧",
+      "count": 1
+    },
+    {
+      "char": "誖",
+      "count": 1
+    },
+    {
+      "char": "謥",
+      "count": 1
+    },
+    {
+      "char": "謷",
+      "count": 1
+    },
+    {
+      "char": "譌",
+      "count": 1
+    },
+    {
+      "char": "譍",
+      "count": 1
+    },
+    {
+      "char": "譳",
+      "count": 1
+    },
+    {
+      "char": "讷",
+      "count": 1
+    },
+    {
+      "char": "诂",
+      "count": 1
+    },
+    {
+      "char": "诎",
+      "count": 1
+    },
+    {
+      "char": "诖",
+      "count": 1
+    },
+    {
+      "char": "诧",
+      "count": 1
+    },
+    {
+      "char": "诩",
+      "count": 1
+    },
+    {
+      "char": "诼",
+      "count": 1
+    },
+    {
+      "char": "谂",
+      "count": 1
+    },
+    {
+      "char": "谌",
+      "count": 1
+    },
+    {
+      "char": "谚",
+      "count": 1
+    },
+    {
+      "char": "谜",
+      "count": 1
+    },
+    {
+      "char": "谡",
+      "count": 1
+    },
+    {
+      "char": "谳",
+      "count": 1
+    },
+    {
+      "char": "谺",
+      "count": 1
+    },
+    {
+      "char": "豉",
+      "count": 1
+    },
+    {
+      "char": "豭",
+      "count": 1
+    },
+    {
+      "char": "豽",
+      "count": 1
+    },
+    {
+      "char": "貎",
+      "count": 1
+    },
+    {
+      "char": "賨",
+      "count": 1
+    },
+    {
+      "char": "贽",
+      "count": 1
+    },
+    {
+      "char": "赇",
+      "count": 1
+    },
+    {
+      "char": "赉",
+      "count": 1
+    },
+    {
+      "char": "赝",
+      "count": 1
+    },
+    {
+      "char": "赣",
+      "count": 1
+    },
+    {
+      "char": "赮",
+      "count": 1
+    },
+    {
+      "char": "趄",
+      "count": 1
+    },
+    {
+      "char": "趍",
+      "count": 1
+    },
+    {
+      "char": "趑",
+      "count": 1
+    },
+    {
+      "char": "趟",
+      "count": 1
+    },
+    {
+      "char": "趠",
+      "count": 1
+    },
+    {
+      "char": "趿",
+      "count": 1
+    },
+    {
+      "char": "跗",
+      "count": 1
+    },
+    {
+      "char": "跞",
+      "count": 1
+    },
+    {
+      "char": "跧",
+      "count": 1
+    },
+    {
+      "char": "踖",
+      "count": 1
+    },
+    {
+      "char": "踦",
+      "count": 1
+    },
+    {
+      "char": "踧",
+      "count": 1
+    },
+    {
+      "char": "踸",
+      "count": 1
+    },
+    {
+      "char": "踼",
+      "count": 1
+    },
+    {
+      "char": "蹂",
+      "count": 1
+    },
+    {
+      "char": "蹏",
+      "count": 1
+    },
+    {
+      "char": "蹡",
+      "count": 1
+    },
+    {
+      "char": "蹢",
+      "count": 1
+    },
+    {
+      "char": "蹩",
+      "count": 1
+    },
+    {
+      "char": "躄",
+      "count": 1
+    },
+    {
+      "char": "躏",
+      "count": 1
+    },
+    {
+      "char": "躐",
+      "count": 1
+    },
+    {
+      "char": "躠",
+      "count": 1
+    },
+    {
+      "char": "躶",
+      "count": 1
+    },
+    {
+      "char": "輠",
+      "count": 1
+    },
+    {
+      "char": "輣",
+      "count": 1
+    },
+    {
+      "char": "輴",
+      "count": 1
+    },
+    {
+      "char": "輵",
+      "count": 1
+    },
+    {
+      "char": "轥",
+      "count": 1
+    },
+    {
+      "char": "轪",
+      "count": 1
+    },
+    {
+      "char": "轫",
+      "count": 1
+    },
+    {
+      "char": "轶",
+      "count": 1
+    },
+    {
+      "char": "辫",
+      "count": 1
+    },
+    {
+      "char": "迒",
+      "count": 1
+    },
+    {
+      "char": "邗",
+      "count": 1
+    },
+    {
+      "char": "邢",
+      "count": 1
+    },
+    {
+      "char": "邬",
+      "count": 1
+    },
+    {
+      "char": "郈",
+      "count": 1
+    },
+    {
+      "char": "郍",
+      "count": 1
+    },
+    {
+      "char": "郏",
+      "count": 1
+    },
+    {
+      "char": "郪",
+      "count": 1
+    },
+    {
+      "char": "鄏",
+      "count": 1
+    },
+    {
+      "char": "鄽",
+      "count": 1
+    },
+    {
+      "char": "酖",
+      "count": 1
+    },
+    {
+      "char": "酗",
+      "count": 1
+    },
+    {
+      "char": "酘",
+      "count": 1
+    },
+    {
+      "char": "酙",
+      "count": 1
+    },
+    {
+      "char": "酭",
+      "count": 1
+    },
+    {
+      "char": "醼",
+      "count": 1
+    },
+    {
+      "char": "釂",
+      "count": 1
+    },
+    {
+      "char": "釱",
+      "count": 1
+    },
+    {
+      "char": "鈚",
+      "count": 1
+    },
+    {
+      "char": "鉟",
+      "count": 1
+    },
+    {
+      "char": "鋜",
+      "count": 1
+    },
+    {
+      "char": "鍜",
+      "count": 1
+    },
+    {
+      "char": "鑚",
+      "count": 1
+    },
+    {
+      "char": "钐",
+      "count": 1
+    },
+    {
+      "char": "铇",
+      "count": 1
+    },
+    {
+      "char": "铔",
+      "count": 1
+    },
+    {
+      "char": "铤",
+      "count": 1
+    },
+    {
+      "char": "锈",
+      "count": 1
+    },
+    {
+      "char": "锉",
+      "count": 1
+    },
+    {
+      "char": "锒",
+      "count": 1
+    },
+    {
+      "char": "键",
+      "count": 1
+    },
+    {
+      "char": "锽",
+      "count": 1
+    },
+    {
+      "char": "镉",
+      "count": 1
+    },
+    {
+      "char": "镔",
+      "count": 1
+    },
+    {
+      "char": "镦",
+      "count": 1
+    },
+    {
+      "char": "閴",
+      "count": 1
+    },
+    {
+      "char": "闚",
+      "count": 1
+    },
+    {
+      "char": "闳",
+      "count": 1
+    },
+    {
+      "char": "阂",
+      "count": 1
+    },
+    {
+      "char": "阌",
+      "count": 1
+    },
+    {
+      "char": "阘",
+      "count": 1
+    },
+    {
+      "char": "阚",
+      "count": 1
+    },
+    {
+      "char": "阼",
+      "count": 1
+    },
+    {
+      "char": "阽",
+      "count": 1
+    },
+    {
+      "char": "陑",
+      "count": 1
+    },
+    {
+      "char": "隃",
+      "count": 1
+    },
+    {
+      "char": "隥",
+      "count": 1
+    },
+    {
+      "char": "隹",
+      "count": 1
+    },
+    {
+      "char": "雺",
+      "count": 1
+    },
+    {
+      "char": "霉",
+      "count": 1
+    },
+    {
+      "char": "霎",
+      "count": 1
+    },
+    {
+      "char": "霠",
+      "count": 1
+    },
+    {
+      "char": "霪",
+      "count": 1
+    },
+    {
+      "char": "靓",
+      "count": 1
+    },
+    {
+      "char": "靮",
+      "count": 1
+    },
+    {
+      "char": "靳",
+      "count": 1
+    },
+    {
+      "char": "靸",
+      "count": 1
+    },
+    {
+      "char": "鞓",
+      "count": 1
+    },
+    {
+      "char": "鞔",
+      "count": 1
+    },
+    {
+      "char": "鞙",
+      "count": 1
+    },
+    {
+      "char": "鞫",
+      "count": 1
+    },
+    {
+      "char": "鞴",
+      "count": 1
+    },
+    {
+      "char": "韂",
+      "count": 1
+    },
+    {
+      "char": "韅",
+      "count": 1
+    },
+    {
+      "char": "韺",
+      "count": 1
+    },
+    {
+      "char": "頥",
+      "count": 1
+    },
+    {
+      "char": "顑",
+      "count": 1
+    },
+    {
+      "char": "顚",
+      "count": 1
+    },
+    {
+      "char": "颃",
+      "count": 1
+    },
+    {
+      "char": "颅",
+      "count": 1
+    },
+    {
+      "char": "颏",
+      "count": 1
+    },
+    {
+      "char": "颒",
+      "count": 1
+    },
+    {
+      "char": "颤",
+      "count": 1
+    },
+    {
+      "char": "飁",
+      "count": 1
+    },
+    {
+      "char": "飃",
+      "count": 1
+    },
+    {
+      "char": "餍",
+      "count": 1
+    },
+    {
+      "char": "餮",
+      "count": 1
+    },
+    {
+      "char": "餻",
+      "count": 1
+    },
+    {
+      "char": "餽",
+      "count": 1
+    },
+    {
+      "char": "饍",
+      "count": 1
+    },
+    {
+      "char": "饙",
+      "count": 1
+    },
+    {
+      "char": "饛",
+      "count": 1
+    },
+    {
+      "char": "饩",
+      "count": 1
+    },
+    {
+      "char": "饸",
+      "count": 1
+    },
+    {
+      "char": "馏",
+      "count": 1
+    },
+    {
+      "char": "馤",
+      "count": 1
+    },
+    {
+      "char": "駈",
+      "count": 1
+    },
+    {
+      "char": "駏",
+      "count": 1
+    },
+    {
+      "char": "駬",
+      "count": 1
+    },
+    {
+      "char": "騋",
+      "count": 1
+    },
+    {
+      "char": "騐",
+      "count": 1
+    },
+    {
+      "char": "騘",
+      "count": 1
+    },
+    {
+      "char": "驔",
+      "count": 1
+    },
+    {
+      "char": "驮",
+      "count": 1
+    },
+    {
+      "char": "驸",
+      "count": 1
+    },
+    {
+      "char": "骃",
+      "count": 1
+    },
+    {
+      "char": "骘",
+      "count": 1
+    },
+    {
+      "char": "骴",
+      "count": 1
+    },
+    {
+      "char": "骹",
+      "count": 1
+    },
+    {
+      "char": "髂",
+      "count": 1
+    }
+  ],
+  "high_frequency_characters_after": [
+    {
+      "char": "不",
+      "count": 8810
+    },
+    {
+      "char": "人",
+      "count": 6504
+    },
+    {
+      "char": "无",
+      "count": 5036
+    },
+    {
+      "char": "一",
+      "count": 4804
+    },
+    {
+      "char": "日",
+      "count": 4529
+    },
+    {
+      "char": "有",
+      "count": 4332
+    },
+    {
+      "char": "风",
+      "count": 4271
+    },
+    {
+      "char": "何",
+      "count": 4246
+    },
+    {
+      "char": "山",
+      "count": 4168
+    },
+    {
+      "char": "来",
+      "count": 3725
+    },
+    {
+      "char": "天",
+      "count": 3696
+    },
+    {
+      "char": "君",
+      "count": 3585
+    },
+    {
+      "char": "云",
+      "count": 3534
+    },
+    {
+      "char": "时",
+      "count": 3532
+    },
+    {
+      "char": "为",
+      "count": 3400
+    },
+    {
+      "char": "中",
+      "count": 3316
+    },
+    {
+      "char": "相",
+      "count": 3255
+    },
+    {
+      "char": "水",
+      "count": 3199
+    },
+    {
+      "char": "春",
+      "count": 3053
+    },
+    {
+      "char": "上",
+      "count": 2999
+    },
+    {
+      "char": "白",
+      "count": 2975
+    },
+    {
+      "char": "生",
+      "count": 2951
+    },
+    {
+      "char": "月",
+      "count": 2879
+    },
+    {
+      "char": "如",
+      "count": 2868
+    },
+    {
+      "char": "心",
+      "count": 2787
+    },
+    {
+      "char": "花",
+      "count": 2764
+    },
+    {
+      "char": "自",
+      "count": 2757
+    },
+    {
+      "char": "年",
+      "count": 2739
+    },
+    {
+      "char": "长",
+      "count": 2664
+    },
+    {
+      "char": "此",
+      "count": 2626
+    },
+    {
+      "char": "我",
+      "count": 2585
+    },
+    {
+      "char": "江",
+      "count": 2492
+    },
+    {
+      "char": "知",
+      "count": 2489
+    },
+    {
+      "char": "行",
+      "count": 2482
+    },
+    {
+      "char": "去",
+      "count": 2404
+    },
+    {
+      "char": "见",
+      "count": 2336
+    },
+    {
+      "char": "归",
+      "count": 2313
+    },
+    {
+      "char": "秋",
+      "count": 2225
+    },
+    {
+      "char": "下",
+      "count": 2221
+    },
+    {
+      "char": "得",
+      "count": 2157
+    },
+    {
+      "char": "未",
+      "count": 2153
+    },
+    {
+      "char": "在",
+      "count": 2138
+    },
+    {
+      "char": "高",
+      "count": 2107
+    },
+    {
+      "char": "子",
+      "count": 2079
+    },
+    {
+      "char": "今",
+      "count": 2060
+    },
+    {
+      "char": "清",
+      "count": 2051
+    },
+    {
+      "char": "青",
+      "count": 2046
+    },
+    {
+      "char": "多",
+      "count": 2032
+    },
+    {
+      "char": "与",
+      "count": 2020
+    },
+    {
+      "char": "夜",
+      "count": 1964
+    },
+    {
+      "char": "三",
+      "count": 1955
+    },
+    {
+      "char": "门",
+      "count": 1955
+    },
+    {
+      "char": "空",
+      "count": 1931
+    },
+    {
+      "char": "明",
+      "count": 1911
+    },
+    {
+      "char": "里",
+      "count": 1904
+    },
+    {
+      "char": "事",
+      "count": 1864
+    },
+    {
+      "char": "客",
+      "count": 1851
+    },
+    {
+      "char": "万",
+      "count": 1838
+    },
+    {
+      "char": "酒",
+      "count": 1798
+    },
+    {
+      "char": "朝",
+      "count": 1791
+    },
+    {
+      "char": "道",
+      "count": 1781
+    },
+    {
+      "char": "东",
+      "count": 1780
+    },
+    {
+      "char": "马",
+      "count": 1767
+    },
+    {
+      "char": "可",
+      "count": 1760
+    },
+    {
+      "char": "南",
+      "count": 1756
+    },
+    {
+      "char": "落",
+      "count": 1742
+    },
+    {
+      "char": "老",
+      "count": 1734
+    },
+    {
+      "char": "是",
+      "count": 1725
+    },
+    {
+      "char": "前",
+      "count": 1673
+    },
+    {
+      "char": "家",
+      "count": 1672
+    },
+    {
+      "char": "已",
+      "count": 1666
+    },
+    {
+      "char": "千",
+      "count": 1652
+    },
+    {
+      "char": "金",
+      "count": 1646
+    },
+    {
+      "char": "出",
+      "count": 1640
+    },
+    {
+      "char": "处",
+      "count": 1616
+    },
+    {
+      "char": "身",
+      "count": 1608
+    },
+    {
+      "char": "西",
+      "count": 1607
+    },
+    {
+      "char": "城",
+      "count": 1602
+    },
+    {
+      "char": "声",
+      "count": 1589
+    },
+    {
+      "char": "欲",
+      "count": 1579
+    },
+    {
+      "char": "远",
+      "count": 1564
+    },
+    {
+      "char": "地",
+      "count": 1559
+    },
+    {
+      "char": "寒",
+      "count": 1550
+    },
+    {
+      "char": "新",
+      "count": 1531
+    },
+    {
+      "char": "开",
+      "count": 1518
+    },
+    {
+      "char": "飞",
+      "count": 1499
+    },
+    {
+      "char": "尽",
+      "count": 1495
+    },
+    {
+      "char": "草",
+      "count": 1488
+    },
+    {
+      "char": "谁",
+      "count": 1480
+    },
+    {
+      "char": "深",
+      "count": 1467
+    },
+    {
+      "char": "将",
+      "count": 1466
+    },
+    {
+      "char": "闻",
+      "count": 1466
+    },
+    {
+      "char": "入",
+      "count": 1456
+    },
+    {
+      "char": "玉",
+      "count": 1451
+    },
+    {
+      "char": "流",
+      "count": 1439
+    },
+    {
+      "char": "别",
+      "count": 1436
+    },
+    {
+      "char": "复",
+      "count": 1423
+    },
+    {
+      "char": "思",
+      "count": 1419
+    },
+    {
+      "char": "独",
+      "count": 1416
+    },
+    {
+      "char": "同",
+      "count": 1406
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+{
+  "input_file": "C:\\Users\\12704\\Desktop\\研2\\Quantum-Stochastic-Neural-Network-main\\Quantum-Stochastic-Neural-Network-main\\tasks\\corpus_pipline\\zhwiki-latest-pages-articles1.xml-p1p187712.bz2",
+  "output_file": "C:\\Users\\12704\\Desktop\\研2\\Quantum-Stochastic-Neural-Network-main\\Quantum-Stochastic-Neural-Network-main\\tasks\\corpus_pipline\\sample.cleaned.jsonl",
+  "generated_at_utc": "2026-04-22T06:45:46.447223+00:00",
+  "pages_seen": 5,
+  "pages_kept": 5,
+  "paragraph_count": 285,
+  "character_count": 45361,
+  "vocab_size": 1576,
+  "average_paragraph_length": 159.1614,
+  "paragraphs_dropped_empty": 19,
+  "paragraphs_dropped_short": 149,
+  "paragraphs_dropped_low_chinese": 28,
+  "filters": {
+    "min_chinese_ratio": 0.6,
+    "min_chars": 20
+  },
+  "high_frequency_characters": [
+    {
+      "char": "的",
+      "count": 1949
+    },
+    {
+      "char": "，",
+      "count": 1480
+    },
+    {
+      "char": "学",
+      "count": 1228
+    },
+    {
+      "char": "。",
+      "count": 1053
+    },
+    {
+      "char": "和",
+      "count": 500
+    },
+    {
+      "char": "一",
+      "count": 498
+    },
+    {
+      "char": "、",
+      "count": 489
+    },
+    {
+      "char": "史",
+      "count": 481
+    },
+    {
+      "char": "是",
+      "count": 468
+    },
+    {
+      "char": "在",
+      "count": 430
+    },
+    {
+      "char": "为",
+      "count": 381
+    },
+    {
+      "char": "历",
+      "count": 359
+    },
+    {
+      "char": "文",
+      "count": 353
+    },
+    {
+      "char": "主",
+      "count": 347
+    },
+    {
+      "char": "数",
+      "count": 316
+    },
+    {
+      "char": "理",
+      "count": 302
+    },
+    {
+      "char": "哲",
+      "count": 289
+    },
+    {
+      "char": "有",
+      "count": 275
+    },
+    {
+      "char": "义",
+      "count": 269
+    },
+    {
+      "char": "中",
+      "count": 257
+    },
+    {
+      "char": "了",
+      "count": 257
+    },
+    {
+      "char": "以",
+      "count": 246
+    },
+    {
+      "char": "科",
+      "count": 233
+    },
+    {
+      "char": "计",
+      "count": 229
+    },
+    {
+      "char": "算",
+      "count": 225
+    },
+    {
+      "char": "人",
+      "count": 223
+    },
+    {
+      "char": "于",
+      "count": 210
+    },
+    {
+      "char": "时",
+      "count": 210
+    },
+    {
+      "char": "论",
+      "count": 210
+    },
+    {
+      "char": "家",
+      "count": 207
+    },
+    {
+      "char": "究",
+      "count": 207
+    },
+    {
+      "char": "对",
+      "count": 204
+    },
+    {
+      "char": "研",
+      "count": 203
+    },
+    {
+      "char": "不",
+      "count": 203
+    },
+    {
+      "char": "及",
+      "count": 201
+    },
+    {
+      "char": "其",
+      "count": 199
+    },
+    {
+      "char": "用",
+      "count": 198
+    },
+    {
+      "char": "性",
+      "count": 198
+    },
+    {
+      "char": "而",
+      "count": 194
+    },
+    {
+      "char": "作",
+      "count": 184
+    },
+    {
+      "char": "发",
+      "count": 184
+    },
+    {
+      "char": "分",
+      "count": 184
+    },
+    {
+      "char": "个",
+      "count": 184
+    },
+    {
+      "char": "代",
+      "count": 181
+    },
+    {
+      "char": "这",
+      "count": 178
+    },
+    {
+      "char": "现",
+      "count": 177
+    },
+    {
+      "char": "世",
+      "count": 174
+    },
+    {
+      "char": "方",
+      "count": 173
+    },
+    {
+      "char": "机",
+      "count": 166
+    },
+    {
+      "char": "他",
+      "count": 165
+    },
+    {
+      "char": "与",
+      "count": 164
+    },
+    {
+      "char": "如",
+      "count": 163
+    },
+    {
+      "char": "大",
+      "count": 157
+    },
+    {
+      "char": "多",
+      "count": 153
+    },
+    {
+      "char": "来",
+      "count": 153
+    },
+    {
+      "char": "可",
+      "count": 151
+    },
+    {
+      "char": "些",
+      "count": 150
+    },
+    {
+      "char": "实",
+      "count": 146
+    },
+    {
+      "char": "思",
+      "count": 146
+    },
+    {
+      "char": "尔",
+      "count": 144
+    },
+    {
+      "char": "国",
+      "count": 143
+    },
+    {
+      "char": "法",
+      "count": 143
+    },
+    {
+      "char": "题",
+      "count": 142
+    },
+    {
+      "char": "过",
+      "count": 139
+    },
+    {
+      "char": "上",
+      "count": 135
+    },
+    {
+      "char": "系",
+      "count": 133
+    },
+    {
+      "char": "被",
+      "count": 132
+    },
+    {
+      "char": "化",
+      "count": 132
+    },
+    {
+      "char": "关",
+      "count": 132
+    },
+    {
+      "char": "认",
+      "count": 131
+    },
+    {
+      "char": "统",
+      "count": 129
+    },
+    {
+      "char": "形",
+      "count": 127
+    },
+    {
+      "char": "期",
+      "count": 127
+    },
+    {
+      "char": "“",
+      "count": 126
+    },
+    {
+      "char": "”",
+      "count": 126
+    },
+    {
+      "char": "到",
+      "count": 126
+    },
+    {
+      "char": "要",
+      "count": 126
+    },
+    {
+      "char": "同",
+      "count": 124
+    },
+    {
+      "char": "成",
+      "count": 123
+    },
+    {
+      "char": "生",
+      "count": 121
+    },
+    {
+      "char": "解",
+      "count": 121
+    },
+    {
+      "char": "体",
+      "count": 120
+    },
+    {
+      "char": "之",
+      "count": 118
+    },
+    {
+      "char": "等",
+      "count": 118
+    },
+    {
+      "char": "种",
+      "count": 117
+    },
+    {
+      "char": "类",
+      "count": 116
+    },
+    {
+      "char": "定",
+      "count": 114
+    },
+    {
+      "char": "德",
+      "count": 114
+    },
+    {
+      "char": "出",
+      "count": 113
+    },
+    {
+      "char": "本",
+      "count": 113
+    },
+    {
+      "char": "教",
+      "count": 112
+    },
+    {
+      "char": "纪",
+      "count": 111
+    },
+    {
+      "char": "年",
+      "count": 111
+    },
+    {
+      "char": "特",
+      "count": 111
+    },
+    {
+      "char": "者",
+      "count": 110
+    },
+    {
+      "char": "问",
+      "count": 110
+    },
+    {
+      "char": "重",
+      "count": 110
+    },
+    {
+      "char": "域",
+      "count": 109
+    },
+    {
+      "char": "展",
+      "count": 108
+    },
+    {
+      "char": "事",
+      "count": 108
+    }
+  ]
+}

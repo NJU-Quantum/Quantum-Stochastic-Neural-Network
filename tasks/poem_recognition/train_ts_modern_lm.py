@@ -172,7 +172,7 @@ def main() -> None:
     parser.add_argument("--outdir", type=str, default="outputs/poem_recognition/ts_modern_lm")
     parser.add_argument("--seed", type=int, default=13)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--level", type=str, choices=["char", "word", "bpe"], default="bpe")
+    parser.add_argument("--level", type=str, choices=["char", "word", "bpe"], default="word")
     parser.add_argument("--bpe-merges", type=int, default=1500)
     parser.add_argument("--bpe-min-pair-freq", type=int, default=2)
     parser.add_argument("--block-size", type=int, default=32)

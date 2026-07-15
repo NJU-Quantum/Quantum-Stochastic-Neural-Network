@@ -224,6 +224,65 @@ def evolve_state_chebyshev(psi0, H, T, max_order=128, tol=1e-10):
         return out[0]
     return out
 
+
+def _left_apply_state_evolver_to_density(rho, evolve_columns):
+    """Apply a state-vector evolution to every column of a density matrix."""
+    if rho.dim() == 2:
+        rho_b = rho.unsqueeze(0)
+        squeeze_back = True
+    else:
+        rho_b = rho
+        squeeze_back = False
+
+    batch, n, _ = rho_b.shape
+    # (B, row, column) -> (B * column, row, 1)
+    columns = rho_b.transpose(-1, -2).reshape(batch * n, n, 1)
+    evolved_columns = evolve_columns(columns)
+    out = evolved_columns.reshape(batch, n, n).transpose(-1, -2).contiguous()
+
+    if squeeze_back:
+        return out[0]
+    return out
+
+
+def _evolve_density_from_state_evolver(rho0, evolve_columns):
+    """
+    Apply rho -> U rho U^dagger without explicitly constructing U.
+
+    ``evolve_columns`` must implement psi -> U psi for batched state vectors.
+    The second application uses (U (U rho)^dagger)^dagger = U rho U^dagger.
+    """
+    left = _left_apply_state_evolver_to_density(rho0, evolve_columns)
+    return _left_apply_state_evolver_to_density(left.mH, evolve_columns).mH
+
+
+def evolve_density_chebyshev(rho0, H, T, max_order=128, tol=1e-10):
+    """Chebyshev coherent evolution of a density matrix without forming U."""
+    return _evolve_density_from_state_evolver(
+        rho0,
+        lambda columns: evolve_state_chebyshev(
+            columns,
+            H,
+            T,
+            max_order=max_order,
+            tol=tol,
+        ),
+    )
+
+
+def evolve_density_suzuki(rho0, H, T, steps=12, order=2):
+    """Suzuki coherent evolution of a density matrix without forming global U."""
+    return _evolve_density_from_state_evolver(
+        rho0,
+        lambda columns: evolve_state_suzuki(
+            columns,
+            H,
+            T,
+            steps=steps,
+            order=order,
+        ),
+    )
+
 def evolve_vec_rk4(rho0, H, Ls, T, steps=100): # 直接在密度矩阵空间使用RK4方法数值求解Liouvillian演化
     rho = rho0.clone()
     dt = T / steps
@@ -513,6 +572,84 @@ def evolve_qsnn2d_stage2_split(rho0, H, gamma, T, N_in, steps=20):
         rho = U_half_b @ rho @ U_half_dag_b
         rho = _qsnn2d_structured_dissipative_exact_step(rho, gamma, dt, N_in)
         rho = U_half_b @ rho @ U_half_dag_b
+    return rho
+
+
+def evolve_qsnn2d_cheby_suzuki(
+    rho0,
+    H,
+    gamma,
+    T,
+    N_in,
+    steps=20,
+    chebyshev_order=128,
+    chebyshev_tol=1e-10,
+):
+    """
+    Structured second-order Suzuki evolution whose coherent substeps use
+    Chebyshev propagation and whose dissipative substep is evaluated exactly.
+
+    This is the ``cheby_suzuki`` composite backend. It avoids constructing a
+    dense coherent propagator for the Hamiltonian substeps.
+    """
+    rho = rho0.clone()
+    dt = T / steps
+
+    for _ in range(steps):
+        rho = evolve_density_chebyshev(
+            rho,
+            H,
+            0.5 * dt,
+            max_order=chebyshev_order,
+            tol=chebyshev_tol,
+        )
+        rho = _qsnn2d_structured_dissipative_exact_step(rho, gamma, dt, N_in)
+        rho = evolve_density_chebyshev(
+            rho,
+            H,
+            0.5 * dt,
+            max_order=chebyshev_order,
+            tol=chebyshev_tol,
+        )
+    return rho
+
+
+def evolve_qsnn2d_suzuki_global(
+    rho0,
+    H,
+    gamma,
+    T,
+    N_in,
+    steps=20,
+    coherent_steps=1,
+    coherent_order=2,
+):
+    """
+    Structured second-order Suzuki evolution whose coherent and dissipative
+    portions both follow Suzuki composition.
+
+    This is the ``suzuki_global`` composite backend. The coherent half-steps
+    use ``evolve_density_suzuki`` and the structured dissipative step is exact.
+    """
+    rho = rho0.clone()
+    dt = T / steps
+
+    for _ in range(steps):
+        rho = evolve_density_suzuki(
+            rho,
+            H,
+            0.5 * dt,
+            steps=coherent_steps,
+            order=coherent_order,
+        )
+        rho = _qsnn2d_structured_dissipative_exact_step(rho, gamma, dt, N_in)
+        rho = evolve_density_suzuki(
+            rho,
+            H,
+            0.5 * dt,
+            steps=coherent_steps,
+            order=coherent_order,
+        )
     return rho
 
 

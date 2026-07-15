@@ -1,0 +1,47 @@
+experiment:
+  name: mnist0_64_qsnn
+  seed: 0
+  output_dir: outputs/qgan/mnist0_64_qsnn
+
+data:
+  dataset: mnist
+  root: datasets
+  digits: [0]
+  image_size: 8
+  samples_per_class: 1000
+  download: false
+  encoding: probability_amplitude
+
+model:
+  generator: pqc
+  generator_layers: 2
+  discriminator: qsnn
+  input_dim: 64
+  backend: cheby_suzuki
+  loss_mode: trace_z
+  coherent_time: 1.0
+  dissipative_time: 1.0
+  stage2_steps: 12
+  chebyshev_order: 128
+  chebyshev_tol: 1.0e-10
+  suzuki_steps: 12
+  suzuki_order: 2
+  init_h: 0.02
+  init_gamma: 0.1
+  target_output_mass: 0.8
+  gamma_semantics: amplitude
+  ablation: full
+
+training:
+  epochs: 100
+  batch_size: 16
+  lr_g: 0.001
+  lr_d: 0.001
+  n_d_steps: 1
+  grad_clip: 5.0
+  leakage_penalty: 0.1
+  checkpoint_every: 1
+
+runtime:
+  device: cuda
+  complex_dtype: complex64

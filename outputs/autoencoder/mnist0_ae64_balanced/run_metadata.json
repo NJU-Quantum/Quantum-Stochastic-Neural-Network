@@ -1,0 +1,33 @@
+{
+  "runtime": {
+    "python": "3.12.13",
+    "pytorch": "2.12.1+cu132",
+    "cuda_runtime": "13.2",
+    "cuda_available": true,
+    "git_commit": "4ab3e275cca0b69a229d04d3a78c652ab02b1939",
+    "gpu": "NVIDIA GeForce RTX 5060",
+    "compute_capability": [
+      12,
+      0
+    ]
+  },
+  "device": "cuda",
+  "data": {
+    "train": true,
+    "digits": [
+      0
+    ],
+    "image_size": 28,
+    "seed": 0,
+    "samples_per_class": 1000,
+    "source_shape": [
+      28,
+      28
+    ],
+    "train_samples": 900,
+    "validation_samples": 100,
+    "validation_fraction": 0.1,
+    "split_seed": 0
+  },
+  "model_parameters": 215601
+}

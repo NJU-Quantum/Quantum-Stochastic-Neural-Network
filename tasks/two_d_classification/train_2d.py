@@ -46,8 +46,8 @@ def main():
     losses = []
     for it in range(steps):
         opt.zero_grad()
-        _, logits = model(Xd)
-        loss = torch.nn.functional.cross_entropy(logits, yd)
+        probs, _ = model(Xd)
+        loss = torch.nn.functional.nll_loss(torch.log(probs), yd)
         loss.backward()
         opt.step()
 

@@ -104,3 +104,67 @@ class VQCDiscriminator(nn.Module):
             "rho_out": rho_out,
             **partition_output_statistics(rho_out, self.readout_split),
         }
+
+    def forward_state(self, state_in: torch.Tensor):
+        """Apply the unitary discriminator directly to pure state vectors."""
+        squeeze_back = state_in.dim() == 1 or (
+            state_in.dim() == 2 and state_in.shape == (self.input_dim, 1)
+        )
+        if state_in.dim() == 1:
+            state = state_in.unsqueeze(0)
+        elif state_in.dim() == 2 and state_in.shape == (self.input_dim, 1):
+            state = state_in[:, 0].unsqueeze(0)
+        elif state_in.dim() == 2 and state_in.shape[-1] == self.input_dim:
+            state = state_in
+        elif state_in.dim() == 3 and state_in.shape[-2:] == (self.input_dim, 1):
+            state = state_in[..., 0]
+        else:
+            raise ValueError(
+                f"state_in must end in dimension {self.input_dim}; got {tuple(state_in.shape)}"
+            )
+        state = state.to(device=self.H_raw.device, dtype=self.complex_dtype)
+        original_state = state
+        H = self.hamiltonian()
+        columns = state.unsqueeze(-1)
+        if self.evolution_time == 0:
+            evolved = columns
+        elif self.backend == "chebyshev":
+            evolved = qsw.evolve_state_chebyshev(
+                columns,
+                H,
+                self.evolution_time,
+                max_order=self.chebyshev_order,
+                tol=self.chebyshev_tol,
+            )
+        elif self.backend == "suzuki":
+            evolved = qsw.evolve_state_suzuki(
+                columns,
+                H,
+                self.evolution_time,
+                steps=self.suzuki_steps,
+                order=self.suzuki_order,
+            )
+        else:
+            evolved = qsw.evolve_state_exact(columns, H, self.evolution_time)
+        state_out = evolved.squeeze(-1)
+        probabilities = state_out.abs().square()
+        p_real = probabilities[..., : self.readout_split].sum(dim=-1)
+        p_fake = probabilities[..., self.readout_split :].sum(dim=-1)
+        output_mass = p_real + p_fake
+        normalized = torch.stack([p_real, p_fake], dim=-1)
+        normalized = normalized / output_mass.unsqueeze(-1).clamp_min(1e-12)
+        result = {
+            "state_in": original_state,
+            "state_coherent": state_out,
+            "state_out": state_out,
+            "p_real": p_real,
+            "p_fake": p_fake,
+            "output_mass": output_mass,
+            "leakage": 1.0 - output_mass,
+            "z_expectation": p_real - p_fake,
+            "normalized_probs": normalized,
+            "state_trace": output_mass,
+        }
+        if squeeze_back:
+            result = {key: value[0] for key, value in result.items()}
+        return result

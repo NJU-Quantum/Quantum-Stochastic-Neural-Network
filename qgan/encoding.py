@@ -20,12 +20,11 @@ def area_downsample(images: torch.Tensor, image_size: int) -> torch.Tensor:
     raise ValueError(f"images must have shape (B,H,W) or (B,C,H,W), got {tuple(images.shape)}")
 
 
-def probability_amplitude_encode(pixels: torch.Tensor, eps: float = 1e-8):
-    """
-    Encode non-negative flattened pixels using probability amplitudes.
+def probability_amplitude_state(pixels: torch.Tensor, eps: float = 1e-8):
+    """Encode non-negative features as probabilities and a pure state vector.
 
-    The last dimension is treated as the pixel dimension. A one-dimensional
-    input is handled as a single sample. Returns ``(probabilities, psi, rho)``.
+    This is the memory-efficient form used by high-dimensional experiments. It
+    deliberately avoids materializing the ``N x N`` density matrix.
     """
     if pixels.dim() == 0:
         raise ValueError("pixels must contain at least one feature dimension")
@@ -42,6 +41,17 @@ def probability_amplitude_encode(pixels: torch.Tensor, eps: float = 1e-8):
     probabilities = (values + eps) / denominator.clamp_min(torch.finfo(values.dtype).tiny)
     complex_dtype = torch.complex128 if values.dtype == torch.float64 else torch.complex64
     psi = torch.sqrt(probabilities).to(complex_dtype).unsqueeze(-1)
+    return probabilities, psi
+
+
+def probability_amplitude_encode(pixels: torch.Tensor, eps: float = 1e-8):
+    """
+    Encode non-negative flattened pixels using probability amplitudes.
+
+    The last dimension is treated as the pixel dimension. A one-dimensional
+    input is handled as a single sample. Returns ``(probabilities, psi, rho)``.
+    """
+    probabilities, psi = probability_amplitude_state(pixels, eps=eps)
     rho = psi @ psi.mH
     return probabilities, psi, rho
 

@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 import torch
+from torch.utils.data import TensorDataset
 
 from qgan.autoencoder import (
     ProbabilityAutoencoder,
@@ -10,9 +11,19 @@ from qgan.autoencoder import (
     save_autoencoder_artifact,
 )
 from qgan.generators import PQCGenerator
+from scripts.train_autoencoder import save_reconstruction_grid
 
 
 class ProbabilityAutoencoderTests(unittest.TestCase):
+    def test_single_validation_sample_grid(self):
+        model = ProbabilityAutoencoder(latent_dim=8, base_channels=2).eval()
+        dataset = TensorDataset(torch.rand(1, 784), torch.zeros(1, dtype=torch.long))
+        with tempfile.TemporaryDirectory() as directory:
+            output_dir = Path(directory)
+            save_reconstruction_grid(model, dataset, output_dir, torch.device("cpu"))
+            self.assertTrue((output_dir / "reconstruction_grid.png").exists())
+            self.assertTrue((output_dir / "reconstruction_samples.pt").exists())
+
     def test_probability_latent_and_reconstruction_shapes(self):
         torch.manual_seed(5)
         model = ProbabilityAutoencoder(latent_dim=64, base_channels=4)

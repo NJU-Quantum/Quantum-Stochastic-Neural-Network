@@ -1,0 +1,49 @@
+experiment:
+  name: mnist0_full784_padded1024_vqc
+  seed: 0
+  output_dir: outputs/qgan/highdim_comparison/dim784/vqc
+
+data:
+  dataset: mnist
+  root: datasets
+  digits: [0]
+  image_size: 28
+  samples_per_class: 1000
+  download: false
+  representation: zero_padded_pixels
+  valid_feature_dim: 784
+  encoding: probability_amplitude
+  encoding_eps: 0.0
+
+model:
+  generator: pqc
+  generator_layers: 4
+  noise_dim: 24
+  noise_reuploading: true
+  alternating_entanglement: true
+  canonicalize_output: true
+  discriminator: vqc
+  input_dim: 1024
+  backend: chebyshev
+  loss_mode: trace_z
+  evolution_time: 1.0
+  chebyshev_order: 128
+  chebyshev_tol: 1.0e-10
+  init_h: 0.02
+
+training:
+  epochs: 100
+  batch_size: 16
+  lr_g: 0.001
+  lr_d: 0.001
+  n_d_steps: 1
+  n_g_steps: 3
+  grad_clip: 5.0
+  leakage_penalty: 0.0
+  padding_mass_penalty: 1.0
+  statevector_training: true
+  checkpoint_every: 1
+
+runtime:
+  device: cuda
+  complex_dtype: complex64

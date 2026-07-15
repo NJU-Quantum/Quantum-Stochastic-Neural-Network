@@ -68,3 +68,62 @@ def physicality_diagnostics(rho: torch.Tensor, include_min_eigenvalue: bool = Fa
 
 def trainable_parameter_count(module) -> int:
     return sum(parameter.numel() for parameter in module.parameters() if parameter.requires_grad)
+
+
+def empirical_pure_state_metrics(
+    real_states: torch.Tensor,
+    fake_states: torch.Tensor,
+) -> dict[str, torch.Tensor]:
+    """Metrics between empirical mixtures without forming ``N x N`` matrices.
+
+    Each row is interpreted as a normalized pure state with uniform empirical
+    weight. All expensive decompositions are bounded by the combined batch
+    size, so this remains practical for the 1024-dimensional padded MNIST run.
+    """
+    if real_states.dim() != 2 or fake_states.dim() != 2:
+        raise ValueError("real_states and fake_states must have shape (B,N)")
+    if real_states.shape[-1] != fake_states.shape[-1]:
+        raise ValueError("real and fake state dimensions must match")
+    if real_states.shape[0] == 0 or fake_states.shape[0] == 0:
+        raise ValueError("state batches must be non-empty")
+
+    complex_dtype = (
+        torch.complex128
+        if real_states.dtype == torch.complex128 or fake_states.dtype == torch.complex128
+        else torch.complex64
+    )
+    real = real_states.to(complex_dtype)
+    fake = fake_states.to(complex_dtype)
+    real_factor = real.T / real.shape[0] ** 0.5
+    fake_factor = fake.T / fake.shape[0] ** 0.5
+
+    cross_gram = real_factor.mH @ fake_factor
+    fidelity = torch.linalg.svdvals(cross_gram).sum().square().real.clamp(0, 1)
+
+    factors = torch.cat([real_factor, fake_factor], dim=-1)
+    _q, r = torch.linalg.qr(factors, mode="reduced")
+    signs = torch.cat(
+        [
+            torch.ones(real.shape[0], device=r.device, dtype=r.real.dtype),
+            -torch.ones(fake.shape[0], device=r.device, dtype=r.real.dtype),
+        ]
+    ).to(r.dtype)
+    small_difference = (r * signs.unsqueeze(0)) @ r.mH
+    small_difference = 0.5 * (small_difference + small_difference.mH)
+    trace_distance_value = 0.5 * torch.linalg.eigvalsh(small_difference).abs().sum().real
+
+    real_probabilities = real.abs().square().mean(dim=0)
+    fake_probabilities = fake.abs().square().mean(dim=0)
+    coefficient = torch.sqrt(real_probabilities * fake_probabilities).sum().clamp(0, 1)
+    hellinger = torch.sqrt((1.0 - coefficient).clamp_min(0))
+    total_variation = 0.5 * (real_probabilities - fake_probabilities).abs().sum()
+    real_gram = real_factor.mH @ real_factor
+    fake_gram = fake_factor.mH @ fake_factor
+    return {
+        "fidelity_mean_states": fidelity,
+        "trace_distance_mean_states": trace_distance_value,
+        "hellinger_mean_states": hellinger,
+        "total_variation_mean_states": total_variation,
+        "purity_real_mean_state": real_gram.abs().square().sum().real,
+        "purity_fake_mean_state": fake_gram.abs().square().sum().real,
+    }

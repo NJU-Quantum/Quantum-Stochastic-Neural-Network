@@ -33,10 +33,11 @@ if str(ROOT) not in sys.path:
 from qgan.autoencoder import load_autoencoder_artifact
 from qgan.checkpoint import load_checkpoint, runtime_metadata, save_checkpoint
 from qgan.data import load_mnist_tensor_dataset
-from qgan.encoding import probability_amplitude_encode
+from qgan.encoding import probability_amplitude_encode, probability_amplitude_state
 from qgan.generators import PQCGenerator
 from qgan.metrics import (
     density_fidelity,
+    empirical_pure_state_metrics,
     hellinger_distance,
     physicality_diagnostics,
     purity,
@@ -53,7 +54,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--resume", type=Path)
-    parser.add_argument("--device", choices=("auto", "cpu", "cuda"))
+    parser.add_argument("--device", help="PyTorch device, e.g. cpu, cuda, or cuda:2")
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--batch-size", type=int)
     parser.add_argument("--samples-per-class", type=int)
@@ -110,9 +111,15 @@ def apply_overrides(config: dict, args) -> dict:
 def resolve_device(name: str) -> torch.device:
     if name == "auto":
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if name == "cuda" and not torch.cuda.is_available():
+    if name.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("runtime.device=cuda, but CUDA is unavailable")
-    return torch.device(name)
+    device = torch.device(name)
+    if device.type == "cuda" and device.index is not None:
+        if device.index >= torch.cuda.device_count():
+            raise RuntimeError(
+                f"Requested {device}, but only {torch.cuda.device_count()} CUDA devices are visible"
+            )
+    return device
 
 
 def seed_everything(seed: int) -> None:
@@ -160,11 +167,33 @@ def make_dataset(config: dict, seed: int):
 
 @torch.no_grad()
 def prepare_autoencoder_representation(dataset, config: dict, device: torch.device):
-    """Replace 784-pixel samples with frozen 64D probability latents."""
+    """Prepare direct, Autoencoder, or losslessly zero-padded features."""
     data_config = config["data"]
     representation = data_config.get("representation", "direct_pixels")
     if representation == "direct_pixels":
         return dataset, None, None
+    if representation == "zero_padded_pixels":
+        if len(dataset.tensors) != 2:
+            raise ValueError("Zero-padded preprocessing expects a (pixels, labels) TensorDataset")
+        pixels, labels = dataset.tensors
+        valid_feature_dim = int(data_config.get("valid_feature_dim", pixels.shape[-1]))
+        input_dim = int(config["model"]["input_dim"])
+        if pixels.shape[-1] != valid_feature_dim:
+            raise ValueError(
+                f"raw feature dimension {pixels.shape[-1]} != data.valid_feature_dim "
+                f"{valid_feature_dim}"
+            )
+        if input_dim < valid_feature_dim:
+            raise ValueError("model.input_dim cannot be smaller than data.valid_feature_dim")
+        padded = F.pad(pixels, (0, input_dim - valid_feature_dim)).contiguous()
+        prepared = TensorDataset(padded, labels, pixels)
+        reference = {
+            "type": "zero_padding",
+            "valid_feature_dim": valid_feature_dim,
+            "hilbert_dim": input_dim,
+            "padding_dim": input_dim - valid_feature_dim,
+        }
+        return prepared, None, reference
     if representation != "autoencoder":
         raise ValueError(f"Unsupported data representation: {representation}")
     if len(dataset.tensors) != 2:
@@ -345,6 +374,106 @@ def evaluation_metrics(
 
 
 @torch.no_grad()
+def evaluation_metrics_statevector(
+    trainer,
+    real_state,
+    noise,
+    *,
+    real_probabilities=None,
+    original_pixels=None,
+    autoencoder=None,
+    valid_feature_dim: int | None = None,
+) -> dict[str, float]:
+    """Scalable evaluation for pure-state training runs."""
+    evaluation = trainer.evaluate_state(real_state, noise)
+    real_output = evaluation["real_output"]
+    fake_output = evaluation["fake_output"]
+    fake_state = evaluation["fake_state"]
+    state_metrics = empirical_pure_state_metrics(
+        real_state.to(device="cpu", dtype=torch.complex128),
+        fake_state.to(device="cpu", dtype=torch.complex128),
+    )
+    real_correct = (real_output["p_real"] >= real_output["p_fake"]).float().mean()
+    fake_correct = (fake_output["p_fake"] > fake_output["p_real"]).float().mean()
+    zero = torch.zeros((), device=real_state.device)
+    metrics = {
+        "V_trace": scalar(evaluation["V_trace"]),
+        "V_direct_success": scalar(evaluation["V_direct_success"]),
+        "accuracy": scalar(0.5 * (real_correct + fake_correct)),
+        "z_real": scalar(real_output["z_expectation"].mean()),
+        "z_fake": scalar(fake_output["z_expectation"].mean()),
+        "output_mass_real": scalar(real_output["output_mass"].mean()),
+        "output_mass_fake": scalar(fake_output["output_mass"].mean()),
+        "leakage_real": scalar(real_output["leakage"].mean()),
+        "leakage_fake": scalar(fake_output["leakage"].mean()),
+        **{name: scalar(value) for name, value in state_metrics.items()},
+        "trace_drift_max": scalar(
+            torch.cat(
+                [real_output["state_trace"].reshape(-1), fake_output["state_trace"].reshape(-1)]
+            ).sub(1.0).abs().max()
+        ),
+        "trace_imag_max": scalar(zero),
+        "hermiticity_drift_max": scalar(zero),
+        "min_eigenvalue": scalar(zero),
+        "padding_mass_real_input": 0.0,
+        "padding_mass_fake_input": scalar(evaluation["padding_mass_fake_input"]),
+    }
+    if valid_feature_dim is not None and valid_feature_dim < real_state.shape[-1]:
+        metrics["padding_mass_real_input"] = scalar(
+            real_state[..., valid_feature_dim:].abs().square().sum(dim=-1).mean()
+        )
+
+    if autoencoder is not None or valid_feature_dim == 28 * 28:
+        if real_probabilities is None or original_pixels is None:
+            raise ValueError("Image metrics require real probabilities and original pixels")
+        fake_probabilities = fake_state.abs().square().to(torch.float32)
+        originals = original_pixels.to(device=fake_state.device, dtype=torch.float32).reshape(
+            -1, 1, 28, 28
+        )
+        if autoencoder is not None:
+            real_latents = real_probabilities.to(device=fake_state.device, dtype=torch.float32)
+            real_latents = real_latents / real_latents.sum(dim=-1, keepdim=True).clamp_min(1e-12)
+            fake_latents = fake_probabilities / fake_probabilities.sum(
+                dim=-1, keepdim=True
+            ).clamp_min(1e-12)
+            reconstructed_real = autoencoder.decode(real_latents)
+            generated_images = autoencoder.decode(fake_latents)
+            quality_probabilities = fake_latents
+            metrics["autoencoder_reconstruction_mse"] = scalar(
+                F.mse_loss(reconstructed_real, originals)
+            )
+        else:
+            valid = int(valid_feature_dim)
+            quality_probabilities = fake_probabilities[..., :valid]
+            quality_probabilities = quality_probabilities / quality_probabilities.sum(
+                dim=-1, keepdim=True
+            ).clamp_min(1e-12)
+            generated_images = quality_probabilities.reshape(-1, 1, 28, 28)
+            generated_images = generated_images / generated_images.amax(
+                dim=(-2, -1), keepdim=True
+            ).clamp_min(1e-12)
+        mean_fake_latent = quality_probabilities.mean(dim=0)
+        latent_entropy = -(
+            mean_fake_latent * mean_fake_latent.clamp_min(1e-12).log()
+        ).sum()
+        metrics.update(
+            {
+                "generated_mean_image_mse": scalar(
+                    F.mse_loss(generated_images.mean(dim=0), originals.mean(dim=0))
+                ),
+                "generated_image_pixel_variance": scalar(
+                    generated_images.var(dim=0, unbiased=False).mean()
+                ),
+                "real_image_pixel_variance": scalar(
+                    originals.var(dim=0, unbiased=False).mean()
+                ),
+                "generated_latent_effective_dimensions": scalar(torch.exp(latent_entropy)),
+            }
+        )
+    return metrics
+
+
+@torch.no_grad()
 def save_decoded_samples(
     output_dir: Path,
     generator,
@@ -354,20 +483,43 @@ def save_decoded_samples(
     seed: int,
     sample_count: int = 16,
     stem: str = "generated_samples_784",
+    valid_feature_dim: int | None = None,
 ) -> None:
-    """Persist measurable latent probabilities and their 28x28 reconstructions."""
+    """Persist generated probabilities and their 28x28 visualizations."""
     generator.eval()
-    autoencoder.eval()
+    if autoencoder is not None:
+        autoencoder.eval()
     noise_generator = torch.Generator().manual_seed(seed)
     noise = torch.randn(sample_count, generator.noise_dim, generator=noise_generator).to(device)
-    generated_rho = generator(noise)
-    probabilities = torch.diagonal(generated_rho, dim1=-2, dim2=-1).real.to(torch.float32)
+    generated_state = generator.statevector(noise)
+    probabilities = generated_state.abs().square().to(torch.float32)
     probabilities = probabilities / probabilities.sum(dim=-1, keepdim=True).clamp_min(1e-12)
-    images = autoencoder.decode(probabilities).cpu()
+    if autoencoder is not None:
+        image_probabilities = probabilities
+        images = autoencoder.decode(image_probabilities).cpu()
+        description = f"{autoencoder.latent_dim}D Autoencoder probabilities"
+    elif valid_feature_dim == 28 * 28:
+        image_probabilities = probabilities[..., :valid_feature_dim]
+        image_probabilities = image_probabilities / image_probabilities.sum(
+            dim=-1, keepdim=True
+        ).clamp_min(1e-12)
+        images = image_probabilities.reshape(-1, 1, 28, 28)
+        images = images / images.amax(dim=(-2, -1), keepdim=True).clamp_min(1e-12)
+        images = images.cpu()
+        description = "784 original pixels embedded in 1024 basis states"
+    else:
+        raise ValueError("Generated image saving requires an Autoencoder or valid_feature_dim=784")
     torch.save(
         {
-            "latent_probabilities": probabilities.cpu(),
+            "state_probabilities": probabilities.cpu(),
+            "image_probabilities": image_probabilities.cpu(),
             "decoded_images": images,
+            "valid_feature_dim": valid_feature_dim,
+            "padding_mass": (
+                probabilities[..., valid_feature_dim:].sum(dim=-1).cpu()
+                if valid_feature_dim is not None and valid_feature_dim < probabilities.shape[-1]
+                else torch.zeros(probabilities.shape[0])
+            ),
             "seed": seed,
         },
         output_dir / f"{stem}.pt",
@@ -378,7 +530,7 @@ def save_decoded_samples(
         axis.axis("off")
         if index < sample_count:
             axis.imshow(images[index, 0], cmap="gray", vmin=0, vmax=1)
-    figure.suptitle("Generated 28x28 images decoded from measurable 64D probabilities")
+    figure.suptitle(f"Generated 28x28 images from {description}")
     figure.tight_layout()
     figure.savefig(output_dir / f"{stem}.png", dpi=180)
     plt.close(figure)
@@ -467,13 +619,23 @@ def main():
         config,
         device,
     )
-    if autoencoder_reference is not None:
+    representation = config["data"].get("representation", "direct_pixels")
+    if representation == "autoencoder" and autoencoder_reference is not None:
         data_metadata = {
             **data_metadata,
             "representation": "autoencoder",
             "original_dimension": 28 * 28,
             "latent_dimension": autoencoder.latent_dim,
             "autoencoder_sha256": autoencoder_reference["sha256"],
+        }
+    elif representation == "zero_padded_pixels":
+        data_metadata = {
+            **data_metadata,
+            "representation": "zero_padded_pixels",
+            "original_dimension": int(config["data"].get("valid_feature_dim", 784)),
+            "hilbert_dimension": int(config["model"]["input_dim"]),
+            "padding_dimension": int(config["model"]["input_dim"])
+            - int(config["data"].get("valid_feature_dim", 784)),
         }
     input_dim = int(config["model"]["input_dim"])
     if dataset.tensors[0].shape[-1] != input_dim:
@@ -499,7 +661,10 @@ def main():
         objective_mode=config["model"].get("loss_mode", "trace_z"),
         grad_clip=config["training"].get("grad_clip"),
         leakage_penalty=float(config["training"].get("leakage_penalty", 0.0)),
+        valid_feature_dim=config["data"].get("valid_feature_dim"),
+        padding_mass_penalty=float(config["training"].get("padding_mass_penalty", 0.0)),
     )
+    statevector_training = bool(config["training"].get("statevector_training", False))
 
     start_epoch = 0
     global_step = 0
@@ -518,11 +683,17 @@ def main():
         if loader_rng_state is not None:
             loader_generator.set_state(loader_rng_state.cpu())
         restored_autoencoder = restored.get("extra", {}).get("autoencoder_reference")
-        if autoencoder_reference is not None and restored_autoencoder is not None:
+        if (
+            representation == "autoencoder"
+            and autoencoder_reference is not None
+            and restored_autoencoder is not None
+        ):
             if restored_autoencoder.get("sha256") != autoencoder_reference["sha256"]:
                 raise ValueError("Resume checkpoint was trained with a different Autoencoder artifact")
 
-    if autoencoder is not None and args.resume is None:
+    saves_images = autoencoder is not None or representation == "zero_padded_pixels"
+    valid_feature_dim = config["data"].get("valid_feature_dim")
+    if saves_images and args.resume is None:
         save_decoded_samples(
             output_dir,
             generator,
@@ -530,14 +701,16 @@ def main():
             device,
             seed=seed + 20260714,
             stem="generated_samples_initial_784",
+            valid_feature_dim=valid_feature_dim,
         )
-        save_decoder_baselines(
-            output_dir,
-            autoencoder,
-            dataset,
-            device,
-            seed=seed + 20260715,
-        )
+        if autoencoder is not None:
+            save_decoder_baselines(
+                output_dir,
+                autoencoder,
+                dataset,
+                device,
+                seed=seed + 20260715,
+            )
 
     run_metadata = {
         "runtime": runtime_metadata(),
@@ -546,6 +719,7 @@ def main():
         "generator_parameters": trainable_parameter_count(generator),
         "discriminator_parameters": trainable_parameter_count(discriminator),
         "autoencoder": autoencoder_reference,
+        "statevector_training": statevector_training,
     }
     with (output_dir / "run_metadata.json").open("w", encoding="utf-8") as handle:
         json.dump(run_metadata, handle, indent=2, ensure_ascii=False, default=str)
@@ -563,14 +737,17 @@ def main():
     if n_d_steps <= 0 or n_g_steps <= 0:
         raise ValueError("training.n_d_steps and training.n_g_steps must be positive")
     noise_dim = generator.noise_dim
+    encoding_eps = float(config["data"].get("encoding_eps", 1e-8))
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
 
     for epoch in range(start_epoch, epochs):
         epoch_start = time.perf_counter()
         loss_d_total = loss_g_total = grad_d_total = grad_g_total = 0.0
+        padding_mass_g_total = 0.0
         batches = 0
         last_real_rho = None
+        last_real_state = None
         last_real_probabilities = None
         last_original_pixels = None
         for batch_data in loader:
@@ -580,36 +757,65 @@ def main():
             original_pixels = (
                 batch_data[2].to(device, non_blocking=True) if len(batch_data) >= 3 else None
             )
-            real_probabilities, _, real_rho = probability_amplitude_encode(features)
-            for _ in range(n_d_steps):
-                d_result = trainer.discriminator_step(
-                    real_rho,
-                    torch.randn(real_rho.shape[0], noise_dim, device=device),
+            if statevector_training:
+                real_probabilities, real_psi = probability_amplitude_state(
+                    features,
+                    eps=encoding_eps,
                 )
+                real_state = real_psi[..., 0]
+                real_rho = None
+            else:
+                real_probabilities, real_psi, real_rho = probability_amplitude_encode(
+                    features,
+                    eps=encoding_eps,
+                )
+                real_state = real_psi[..., 0]
+            for _ in range(n_d_steps):
+                noise = torch.randn(real_state.shape[0], noise_dim, device=device)
+                if statevector_training:
+                    d_result = trainer.discriminator_step_state(real_state, noise)
+                else:
+                    d_result = trainer.discriminator_step(real_rho, noise)
                 loss_d_total += scalar(d_result["loss_d"])
                 grad_d_total += scalar(d_result["grad_norm_d"])
             for _ in range(n_g_steps):
-                g_result = trainer.generator_step(
-                    torch.randn(real_rho.shape[0], noise_dim, device=device)
-                )
+                noise = torch.randn(real_state.shape[0], noise_dim, device=device)
+                if statevector_training:
+                    g_result = trainer.generator_step_state(noise)
+                    padding_mass_g_total += scalar(g_result["padding_mass_g"])
+                else:
+                    g_result = trainer.generator_step(noise)
                 loss_g_total += scalar(g_result["loss_g"])
                 grad_g_total += scalar(g_result["grad_norm_g"])
             batches += 1
             global_step += 1
             last_real_rho = real_rho
+            last_real_state = real_state
             last_real_probabilities = real_probabilities
             last_original_pixels = original_pixels
 
-        if batches == 0 or last_real_rho is None:
+        if batches == 0 or last_real_state is None:
             raise RuntimeError("training produced no batches")
-        evaluation = evaluation_metrics(
-            trainer,
-            last_real_rho,
-            torch.randn(last_real_rho.shape[0], noise_dim, device=device),
-            real_probabilities=last_real_probabilities,
-            original_pixels=last_original_pixels,
-            autoencoder=autoencoder,
-        )
+        evaluation_noise = torch.randn(last_real_state.shape[0], noise_dim, device=device)
+        if statevector_training:
+            evaluation = evaluation_metrics_statevector(
+                trainer,
+                last_real_state,
+                evaluation_noise,
+                real_probabilities=last_real_probabilities,
+                original_pixels=last_original_pixels,
+                autoencoder=autoencoder,
+                valid_feature_dim=valid_feature_dim,
+            )
+        else:
+            evaluation = evaluation_metrics(
+                trainer,
+                last_real_rho,
+                evaluation_noise,
+                real_probabilities=last_real_probabilities,
+                original_pixels=last_original_pixels,
+                autoencoder=autoencoder,
+            )
         if device.type == "cuda":
             torch.cuda.synchronize(device)
         row = {
@@ -621,6 +827,11 @@ def main():
             "grad_norm_G": grad_g_total / (batches * n_g_steps),
             "discriminator_updates": batches * n_d_steps,
             "generator_updates": batches * n_g_steps,
+            **(
+                {"padding_mass_G": padding_mass_g_total / (batches * n_g_steps)}
+                if statevector_training
+                else {}
+            ),
             **evaluation,
             "epoch_seconds": time.perf_counter() - epoch_start,
             "peak_cuda_memory_mb": (
@@ -647,9 +858,13 @@ def main():
                 step=global_step,
                 config=config,
                 preprocessing_version=(
-                    "autoencoder_probability_64_v1"
+                    f"autoencoder_probability_{autoencoder.latent_dim}_v1"
                     if autoencoder is not None
-                    else "probability_amplitude_v1"
+                    else (
+                        f"zero_padded_probability_{valid_feature_dim}_to_{input_dim}_v1"
+                        if representation == "zero_padded_pixels"
+                        else "probability_amplitude_v1"
+                    )
                 ),
                 extra={
                     "last_metrics": row,
@@ -658,13 +873,14 @@ def main():
                     "autoencoder_reference": autoencoder_reference,
                 },
             )
-            if autoencoder is not None:
+            if saves_images:
                 save_decoded_samples(
                     output_dir,
                     generator,
                     autoencoder,
                     device,
                     seed=seed + 20260714,
+                    valid_feature_dim=valid_feature_dim,
                 )
 
 

@@ -1,0 +1,43 @@
+experiment:
+  name: synthetic_64_qsnn_smoke
+  seed: 0
+  output_dir: outputs/qgan/synthetic_64_qsnn_smoke
+
+data:
+  dataset: synthetic
+  num_samples: 8
+
+model:
+  generator: pqc
+  generator_layers: 1
+  discriminator: qsnn
+  input_dim: 64
+  backend: cheby_suzuki
+  loss_mode: trace_z
+  coherent_time: 0.1
+  dissipative_time: 0.2
+  stage2_steps: 2
+  chebyshev_order: 32
+  chebyshev_tol: 1.0e-8
+  suzuki_steps: 2
+  suzuki_order: 2
+  init_h: 0.02
+  init_gamma: 0.2
+  target_output_mass: 0.8
+  gamma_semantics: amplitude
+  ablation: full
+
+training:
+  epochs: 1
+  batch_size: 2
+  max_steps_per_epoch: 2
+  lr_g: 0.001
+  lr_d: 0.001
+  n_d_steps: 1
+  grad_clip: 5.0
+  leakage_penalty: 0.1
+  checkpoint_every: 1
+
+runtime:
+  device: auto
+  complex_dtype: complex64

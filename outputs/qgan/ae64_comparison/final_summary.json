@@ -1,0 +1,42 @@
+[
+  {
+    "model": "qsnn_full",
+    "epoch": 99.0,
+    "loss_D": -0.5747999529989939,
+    "loss_G": -0.28099344055803993,
+    "V_trace": 0.5658870339393616,
+    "V_direct_success": 0.5633230805397034,
+    "accuracy": 0.5,
+    "output_mass_real": 0.9951474666595459,
+    "output_mass_fake": 0.9945968389511108,
+    "leakage_real": 0.004852510988712311,
+    "leakage_fake": 0.005403138697147369,
+    "fidelity_mean_states": 0.7240411832577209,
+    "trace_distance_mean_states": 0.35409320136180705,
+    "total_variation_mean_states": 0.18660444289633268,
+    "grad_norm_D": 0.04531747504832253,
+    "grad_norm_G": 1.114304450769273,
+    "epoch_seconds": 54.78737750000073,
+    "peak_cuda_memory_mb": 379.322265625
+  },
+  {
+    "model": "vqc",
+    "epoch": 99.0,
+    "loss_D": -0.5587546106368776,
+    "loss_G": -0.5008243789117803,
+    "V_trace": 0.5549924969673157,
+    "V_direct_success": 0.5549924969673157,
+    "accuracy": 0.5,
+    "output_mass_real": 0.9999999403953552,
+    "output_mass_fake": 0.9999999403953552,
+    "leakage_real": 6.705522537231445e-08,
+    "leakage_fake": 2.2351741790771484e-08,
+    "fidelity_mean_states": 0.7266339661452905,
+    "trace_distance_mean_states": 0.3501273096342518,
+    "total_variation_mean_states": 0.18131319973084736,
+    "grad_norm_D": 0.03407543735016906,
+    "grad_norm_G": 1.0661203754011286,
+    "epoch_seconds": 10.641098199997941,
+    "peak_cuda_memory_mb": 104.63720703125
+  }
+]

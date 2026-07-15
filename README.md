@@ -127,6 +127,7 @@ Stage-2 演化结束后，读取两个输出节点的对角元：
 - `scipy`
 - `qutip`
 - `nltk`
+- `PyYAML`
 
 ## 常用命令
 
@@ -193,3 +194,75 @@ python experiments/chebyshev_comparision/benchmark_stage1_methods.py \
 ## 说明
 
 `README` 现在主要描述当前仍在使用的主线实现和实验入口。历史实验区中的批量脚本、论文归档与旧路径没有逐一展开，如需追溯可再进入对应目录查看。
+
+---
+
+## QSNN-QGAN 增量实现
+
+`qgan/` 在现有 `qsw.py` 后端上增加了概率幅度编码、PQC 生成器、QSNN 判别器薄封装、标准幺正 VQC 判别器、Trace-Z 目标、量子态指标和 checkpoint。两个组合后端的含义为：
+
+- `cheby_suzuki`：Hamiltonian 相干子流使用 Chebyshev，耗散子流参与二阶 Suzuki/Strang 组合；
+- `suzuki_global`：相干子流与耗散子流都按 Suzuki 组合推进。
+
+结构化耗散子流利用当前固定跳跃拓扑的解析更新，不构造完整 Liouvillian。
+QSNN 跳跃参数采用“每个输入节点的总物理速率 + real/fake 分支概率”，默认按
+`target_output_mass: 0.8` 初始化；VQC 使用读出量子比特的两个完备子空间，因而
+不会产生结构性输出泄漏。训练可用 `leakage_penalty` 抑制 QSNN 后续重新增大泄漏。
+
+确认环境：
+
+```powershell
+conda run -n qsnn python -c "import torch, yaml; print(torch.__version__, torch.cuda.is_available(), yaml.__version__)"
+```
+
+运行全部 QGAN 测试（包含可用时的 CUDA 检查）：
+
+```powershell
+conda run -n qsnn python -m unittest discover -s tests -p "test_qgan_*.py" -v
+```
+
+运行不依赖下载数据的 64 维 smoke test：
+
+```powershell
+conda run -n qsnn python scripts/train_qgan.py --config configs/smoke.yaml
+```
+
+MNIST 0 的 QSNN 与标准幺正 VQC 训练：
+
+```powershell
+conda run -n qsnn python scripts/train_qgan.py --config configs/mnist0_64.yaml --download
+conda run -n qsnn python scripts/train_qgan.py --config configs/mnist0_64_vqc.yaml --download
+```
+
+上面两份配置保留为“直接 8×8 像素生成”消融。当前主实验先训练共享的
+28×28→64 概率瓶颈 Autoencoder，再冻结 Encoder/Decoder，只在可测的64维概率
+潜空间中比较 QSNN full 与 VQC：
+
+```powershell
+conda run -n qsnn python scripts/train_autoencoder.py --config configs/autoencoder_mnist0_64.yaml --download
+conda run -n qsnn python scripts/run_ae64_comparison.py --device cuda
+```
+
+两种判别器共用同一个冻结 Autoencoder、增强的4层噪声重上传生成器和每批次
+`1D:3G` 更新预算。输出目录同时保存初始生成图、最终784维解码图和
+`decoder_baselines.png`；后者展示随机/均匀潜变量经过Decoder的结果，用来防止把
+Decoder自身携带的MNIST先验误判为QGAN学习效果。
+
+增强生成器在内部仍可使用复数相位完成干涉，但送入判别器前会按计算基测量概率
+规范化为非负实振幅。真实样本与生成样本因而采用同一种概率幅编码，判别器不能
+利用与最终图像无关的相位差异取巧。
+
+`H`-only 与 `L`-only 消融共用同一配置和训练预算：
+
+```powershell
+conda run -n qsnn python scripts/train_qgan.py --config configs/mnist0_64.yaml --ablation h_only --output-dir outputs/qgan/mnist0_64_h_only
+conda run -n qsnn python scripts/train_qgan.py --config configs/mnist0_64.yaml --ablation l_only --output-dir outputs/qgan/mnist0_64_l_only
+```
+
+从 checkpoint 继续训练时，配置中的总 epoch 应大于 checkpoint 已完成的 epoch：
+
+```powershell
+conda run -n qsnn python scripts/train_qgan.py --config configs/smoke.yaml --epochs 2 --resume outputs/qgan/synthetic_64_qsnn_smoke/checkpoint_latest.pt
+```
+
+每次运行会在输出目录保存配置副本、环境与参数量信息、`metrics.csv`、`metrics.json` 和最新 checkpoint。指标同时包含 Trace-Z、直接判别成功率、输出质量、leakage、梯度范数、物理性漂移、量子态距离、耗时和 CUDA 峰值显存。

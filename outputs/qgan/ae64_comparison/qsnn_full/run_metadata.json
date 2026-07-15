@@ -1,0 +1,121 @@
+{
+  "runtime": {
+    "python": "3.12.13",
+    "pytorch": "2.12.1+cu132",
+    "cuda_runtime": "13.2",
+    "cuda_available": true,
+    "git_commit": "4ab3e275cca0b69a229d04d3a78c652ab02b1939",
+    "gpu": "NVIDIA GeForce RTX 5060",
+    "compute_capability": [
+      12,
+      0
+    ]
+  },
+  "data": {
+    "train": true,
+    "digits": [
+      0
+    ],
+    "image_size": 28,
+    "seed": 0,
+    "samples_per_class": 1000,
+    "source_shape": [
+      28,
+      28
+    ],
+    "representation": "autoencoder",
+    "original_dimension": 784,
+    "latent_dimension": 64,
+    "autoencoder_sha256": "0fe6072b863ceff53bef72902800ca60dc7ff5a1d7bcb9d8053875e22125e606"
+  },
+  "device": "cuda",
+  "generator_parameters": 750,
+  "discriminator_parameters": 4288,
+  "autoencoder": {
+    "path": "D:\\code\\QSNN\\Quantum-Stochastic-Neural-Network\\outputs\\autoencoder\\mnist0_ae64_balanced\\checkpoint_best.pt",
+    "sha256": "0fe6072b863ceff53bef72902800ca60dc7ff5a1d7bcb9d8053875e22125e606",
+    "model_config": {
+      "latent_dim": 64,
+      "base_channels": 16,
+      "latent_activation": "softplus_l1"
+    },
+    "metadata": {
+      "epoch": 49,
+      "metrics": {
+        "epoch": 49,
+        "train_bce_per_pixel": 0.09299006680512374,
+        "train_mse_per_pixel": 0.00618615188295879,
+        "val_bce_per_pixel": 0.0993714935925542,
+        "val_mse_per_pixel": 0.008072128295898437,
+        "latent_effective_dimensions": 63.80005645751953,
+        "latent_max_mean_probability": 0.01928684674203396,
+        "latent_mean_component_std": 0.012985393404960632,
+        "latent_active_variance_dimensions": 64,
+        "epoch_seconds": 0.07874959999935527
+      },
+      "config": {
+        "experiment": {
+          "name": "mnist0_probability_autoencoder_64",
+          "seed": 0,
+          "output_dir": "outputs/autoencoder/mnist0_ae64_balanced"
+        },
+        "data": {
+          "dataset": "mnist",
+          "root": "datasets",
+          "digits": [
+            0
+          ],
+          "samples_per_class": 1000,
+          "validation_fraction": 0.1,
+          "download": false
+        },
+        "model": {
+          "latent_dim": 64,
+          "base_channels": 16,
+          "latent_activation": "softplus_l1"
+        },
+        "training": {
+          "epochs": 50,
+          "batch_size": 64,
+          "lr": 0.001,
+          "grad_clip": 5.0,
+          "latent_balance_weight": 0.05,
+          "latent_variance_weight": 10.0,
+          "latent_target_std": 0.005
+        },
+        "runtime": {
+          "device": "cuda"
+        }
+      },
+      "data": {
+        "train": true,
+        "digits": [
+          0
+        ],
+        "image_size": 28,
+        "seed": 0,
+        "samples_per_class": 1000,
+        "source_shape": [
+          28,
+          28
+        ],
+        "train_samples": 900,
+        "validation_samples": 100,
+        "validation_fraction": 0.1,
+        "split_seed": 0
+      },
+      "runtime": {
+        "python": "3.12.13",
+        "pytorch": "2.12.1+cu132",
+        "cuda_runtime": "13.2",
+        "cuda_available": true,
+        "git_commit": "4ab3e275cca0b69a229d04d3a78c652ab02b1939",
+        "gpu": "NVIDIA GeForce RTX 5060",
+        "compute_capability": [
+          12,
+          0
+        ]
+      }
+    }
+  }
+}

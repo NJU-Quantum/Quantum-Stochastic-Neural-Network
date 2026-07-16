@@ -163,7 +163,21 @@ def evolve_state_suzuki(psi0, H, T, steps=12, order=2):
     return psi
 
 
-def evolve_state_chebyshev(psi0, H, T, max_order=128, tol=1e-10):
+def chebyshev_spectral_bounds(H):
+    """Return detached spectral bounds reusable across Chebyshev substeps."""
+    with torch.no_grad():
+        evals = torch.linalg.eigvalsh(H)
+        return evals[0].real, evals[-1].real
+
+
+def evolve_state_chebyshev(
+    psi0,
+    H,
+    T,
+    max_order=128,
+    tol=1e-10,
+    spectral_bounds=None,
+):
     """
     用 Chebyshev 展开近似计算 psi(T) = exp(-i H T) psi(0)。
 
@@ -182,9 +196,12 @@ def evolve_state_chebyshev(psi0, H, T, max_order=128, tol=1e-10):
     device = H.device
     dtype = H.dtype
 
-    evals = torch.linalg.eigvalsh(H)
-    e_min = evals[0].real.detach()
-    e_max = evals[-1].real.detach()
+    if spectral_bounds is None:
+        e_min, e_max = chebyshev_spectral_bounds(H)
+    else:
+        e_min, e_max = spectral_bounds
+        e_min = torch.as_tensor(e_min, device=device, dtype=H.real.dtype).detach()
+        e_max = torch.as_tensor(e_max, device=device, dtype=H.real.dtype).detach()
     center = 0.5 * (e_max + e_min)
     radius = 0.5 * (e_max - e_min)
 

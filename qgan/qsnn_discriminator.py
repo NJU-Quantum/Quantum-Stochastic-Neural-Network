@@ -111,10 +111,14 @@ class QSNNDiscriminator(nn.Module):
         return torch.complex128 if self.H_raw.dtype == torch.float64 else torch.complex64
 
     def hamiltonian(self) -> torch.Tensor:
+        h = self.input_hamiltonian()
+        return F.pad(h, (0, 2, 0, 2))
+
+    def input_hamiltonian(self) -> torch.Tensor:
         h = 0.5 * (self.H_raw + self.H_raw.T)
         if self.ablation == "l_only":
             h = torch.zeros_like(h)
-        return F.pad(h.to(self.complex_dtype), (0, 2, 0, 2))
+        return h.to(self.complex_dtype)
 
     def total_rates(self) -> torch.Tensor:
         rates = F.softplus(self.total_rate_raw) + self.min_positive
@@ -227,4 +231,148 @@ class QSNNDiscriminator(nn.Module):
         }
         if squeeze_back:
             result = {key: value[0] if value.dim() > 0 and value.shape[0] == 1 else value for key, value in result.items()}
+        return result
+
+    def _evolve_state(
+        self,
+        state: torch.Tensor,
+        H: torch.Tensor,
+        duration: float,
+        spectral_bounds=None,
+    ) -> torch.Tensor:
+        if duration == 0 or self.ablation == "l_only":
+            return state
+        columns = state.unsqueeze(-1)
+        if self.backend == "cheby_suzuki":
+            evolved = qsw.evolve_state_chebyshev(
+                columns,
+                H,
+                duration,
+                max_order=self.chebyshev_order,
+                tol=self.chebyshev_tol,
+                spectral_bounds=spectral_bounds,
+            )
+        elif self.backend == "suzuki_global":
+            evolved = qsw.evolve_state_suzuki(
+                columns,
+                H,
+                duration,
+                steps=self.suzuki_steps,
+                order=self.suzuki_order,
+            )
+        else:
+            evolved = qsw.evolve_state_exact(columns, H, duration)
+        return evolved.squeeze(-1)
+
+    def forward_state(self, state_in: torch.Tensor):
+        """Memory-efficient discriminator path for pure input states.
+
+        The structured jumps never return population from the two output nodes
+        to the input subspace. Consequently the input block remains a
+        sub-normalized pure state, while two scalars exactly track accumulated
+        real/fake population. This avoids the quadratic density matrix and is
+        the intended path for 128D, 256D, and padded full-resolution runs.
+        """
+        if self.backend == "exact_rk4":
+            raise ValueError("state-vector training does not support backend=exact_rk4")
+        squeeze_back = state_in.dim() == 1 or (
+            state_in.dim() == 2 and state_in.shape == (self.input_dim, 1)
+        )
+        if state_in.dim() == 1:
+            state = state_in.unsqueeze(0)
+        elif state_in.dim() == 2 and state_in.shape == (self.input_dim, 1):
+            state = state_in[:, 0].unsqueeze(0)
+        elif state_in.dim() == 2 and state_in.shape[-1] == self.input_dim:
+            state = state_in
+        elif state_in.dim() == 3 and state_in.shape[-2:] == (self.input_dim, 1):
+            state = state_in[..., 0]
+        else:
+            raise ValueError(
+                f"state_in must end in dimension {self.input_dim}; got {tuple(state_in.shape)}"
+            )
+        state = state.to(device=self.H_raw.device, dtype=self.complex_dtype)
+        original_state = state
+        H = self.input_hamiltonian()
+        spectral_bounds = None
+        if self.backend == "cheby_suzuki" and self.ablation != "l_only":
+            spectral_bounds = qsw.chebyshev_spectral_bounds(H)
+
+        state = self._evolve_state(
+            state,
+            H,
+            self.coherent_time,
+            spectral_bounds=spectral_bounds,
+        )
+        coherent_state = state
+        p_real = torch.zeros(state.shape[0], device=state.device, dtype=state.real.dtype)
+        p_fake = torch.zeros_like(p_real)
+
+        if self.dissipative_time != 0:
+            dt = self.dissipative_time / self.stage2_steps
+            rates_by_output = self.effective_rates()
+            total_rates = rates_by_output.sum(dim=0)
+            transferred_fraction = 1.0 - torch.exp(-total_rates * dt)
+            branch_fractions = torch.where(
+                total_rates.unsqueeze(0) > 1e-12,
+                rates_by_output / total_rates.clamp_min(1e-12).unsqueeze(0),
+                torch.zeros_like(rates_by_output),
+            )
+            survival_amplitude = torch.exp(-0.5 * total_rates * dt).to(state.dtype)
+            for _ in range(self.stage2_steps):
+                state = self._evolve_state(
+                    state,
+                    H,
+                    0.5 * dt,
+                    spectral_bounds=spectral_bounds,
+                )
+                population = state.abs().square()
+                transferred = population * transferred_fraction.unsqueeze(0)
+                p_real = p_real + (
+                    transferred * branch_fractions[0].unsqueeze(0)
+                ).sum(dim=-1)
+                p_fake = p_fake + (
+                    transferred * branch_fractions[1].unsqueeze(0)
+                ).sum(dim=-1)
+                state = state * survival_amplitude.unsqueeze(0)
+                state = self._evolve_state(
+                    state,
+                    H,
+                    0.5 * dt,
+                    spectral_bounds=spectral_bounds,
+                )
+
+        output_mass = p_real + p_fake
+        leakage = 1.0 - output_mass
+        normalized = torch.stack([p_real, p_fake], dim=-1)
+        normalized = normalized / output_mass.unsqueeze(-1).clamp_min(1e-12)
+        result = {
+            "state_in": original_state,
+            "state_coherent": coherent_state,
+            "state_out": state,
+            "p_real": p_real,
+            "p_fake": p_fake,
+            "output_mass": output_mass,
+            "leakage": leakage,
+            "z_expectation": p_real - p_fake,
+            "normalized_probs": normalized,
+            "state_trace": state.abs().square().sum(dim=-1) + output_mass,
+            "jump_amplitudes": self.jump_amplitudes(),
+            "effective_rates": self.effective_rates(),
+            "total_rates": self.total_rates(),
+            "branch_probabilities": self.branch_probabilities(),
+        }
+        if squeeze_back:
+            for key in (
+                "state_in",
+                "state_coherent",
+                "state_out",
+                "p_real",
+                "p_fake",
+                "output_mass",
+                "leakage",
+                "z_expectation",
+                "normalized_probs",
+                "state_trace",
+            ):
+                result[key] = result[key][0]
         return result

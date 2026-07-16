@@ -37,8 +37,10 @@ from qgan.data import load_mnist_tensor_dataset
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--device", choices=("auto", "cpu", "cuda"))
+    parser.add_argument("--device", help="PyTorch device, e.g. cpu, cuda, or cuda:2")
     parser.add_argument("--epochs", type=int)
+    parser.add_argument("--batch-size", type=int)
+    parser.add_argument("--latent-dim", type=int)
     parser.add_argument("--samples-per-class", type=int)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--download", action="store_true")
@@ -48,9 +50,15 @@ def parse_args():
 def resolve_device(name: str) -> torch.device:
     if name == "auto":
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if name == "cuda" and not torch.cuda.is_available():
+    if name.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("runtime.device=cuda, but CUDA is unavailable")
-    return torch.device(name)
+    device = torch.device(name)
+    if device.type == "cuda" and device.index is not None:
+        if device.index >= torch.cuda.device_count():
+            raise RuntimeError(
+                f"Requested {device}, but only {torch.cuda.device_count()} CUDA devices are visible"
+            )
+    return device
 
 
 def seed_everything(seed: int) -> None:
@@ -73,6 +81,10 @@ def apply_overrides(config: dict, args) -> dict:
         config["runtime"]["device"] = args.device
     if args.epochs is not None:
         config["training"]["epochs"] = args.epochs
+    if args.batch_size is not None:
+        config["training"]["batch_size"] = args.batch_size
+    if args.latent_dim is not None:
+        config["model"]["latent_dim"] = args.latent_dim
     if args.samples_per_class is not None:
         config["data"]["samples_per_class"] = args.samples_per_class
     if args.output_dir is not None:
@@ -136,7 +148,13 @@ def save_reconstruction_grid(model, dataset, output_dir: Path, device, count: in
     reconstruction, latent = model(images)
     originals = images[:, 0].cpu()
     reconstructions = reconstruction[:, 0].cpu()
-    figure, axes = plt.subplots(2, count, figsize=(1.7 * count, 3.6), constrained_layout=True)
+    figure, axes = plt.subplots(
+        2,
+        count,
+        figsize=(1.7 * count, 3.6),
+        constrained_layout=True,
+        squeeze=False,
+    )
     for column in range(count):
         axes[0, column].imshow(originals[column], cmap="gray", vmin=0, vmax=1)
         axes[1, column].imshow(reconstructions[column], cmap="gray", vmin=0, vmax=1)

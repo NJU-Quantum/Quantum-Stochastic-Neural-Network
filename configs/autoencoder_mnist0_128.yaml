@@ -23,7 +23,7 @@ training:
   grad_clip: 5.0
   latent_balance_weight: 0.05
   latent_variance_weight: 10.0
-  latent_target_std: 0.005
+  latent_target_std: 0.0025
 
 runtime:
   device: cuda

@@ -1,7 +1,7 @@
 experiment:
-  name: mnist0_ae128_qsnn_full
+  name: mnist0_full784_padded1024_qsnn_full
   seed: 0
-  output_dir: outputs/qgan/highdim_comparison/dim128/qsnn_full
+  output_dir: outputs/qgan/highdim_comparison/dim784/qsnn_full
 
 data:
   dataset: mnist
@@ -10,20 +10,20 @@ data:
   image_size: 28
   samples_per_class: 1000
   download: false
-  representation: autoencoder
-  autoencoder_checkpoint: outputs/autoencoder/mnist0_ae128_balanced/checkpoint_best.pt
-  autoencoder_batch_size: 256
+  representation: zero_padded_pixels
+  valid_feature_dim: 784
   encoding: probability_amplitude
+  encoding_eps: 0.0
 
 model:
   generator: pqc
   generator_layers: 4
-  noise_dim: 16
+  noise_dim: 24
   noise_reuploading: true
   alternating_entanglement: true
   canonicalize_output: true
   discriminator: qsnn
-  input_dim: 128
+  input_dim: 1024
   backend: cheby_suzuki
   loss_mode: trace_z
   coherent_time: 1.0
@@ -48,7 +48,7 @@ training:
   n_g_steps: 3
   grad_clip: 5.0
   leakage_penalty: 0.1
-  padding_mass_penalty: 0.0
+  padding_mass_penalty: 1.0
   statevector_training: true
   checkpoint_every: 1
 

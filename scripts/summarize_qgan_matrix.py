@@ -169,7 +169,7 @@ def load_generator(run_dir: Path):
             checkpoint_path = ROOT / checkpoint_path
         autoencoder, _payload = load_autoencoder_artifact(checkpoint_path, map_location="cpu")
         autoencoder.eval()
-    return generator, autoencoder
+    return generator, autoencoder, config
 
 
 @torch.no_grad()
@@ -186,7 +186,7 @@ def plot_samples(root: Path, runs) -> None:
         constrained_layout=True,
     )
     for row, name in enumerate(available):
-        generator, autoencoder = load_generator(root / name)
+        generator, autoencoder, config = load_generator(root / name)
         noise_rng = torch.Generator().manual_seed(20260713)
         noise = torch.randn(sample_count, generator.noise_dim, generator=noise_rng)
         rho = generator(noise)
@@ -194,6 +194,13 @@ def plot_samples(root: Path, runs) -> None:
         if autoencoder is not None:
             probabilities = probabilities / probabilities.sum(dim=-1, keepdim=True).clamp_min(1e-12)
             images = autoencoder.decode(probabilities)[:, 0]
+        elif config.get("data", {}).get("representation") == "zero_padded_pixels":
+            valid_dim = int(config["data"]["valid_feature_dim"])
+            probabilities = probabilities[..., :valid_dim]
+            probabilities = probabilities / probabilities.sum(
+                dim=-1, keepdim=True
+            ).clamp_min(1e-12)
+            images = probabilities.reshape(sample_count, 28, 28)
         else:
             side = int(round(math.sqrt(generator.state_dim)))
             images = probabilities.reshape(sample_count, side, side)

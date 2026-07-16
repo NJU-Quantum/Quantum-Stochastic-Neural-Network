@@ -133,7 +133,8 @@ class PQCGenerator(nn.Module):
             state = state[:, permutation]
         return state
 
-    def forward(self, noise: torch.Tensor, labels: torch.Tensor | None = None):
+    def statevector(self, noise: torch.Tensor, labels: torch.Tensor | None = None):
+        """Generate normalized state vectors without forming density matrices."""
         if noise.dim() == 1:
             noise = noise.unsqueeze(0)
         if noise.shape[-1] != self.noise_dim:
@@ -198,6 +199,10 @@ class PQCGenerator(nn.Module):
             # generator phases that carry no image information.
             state = state.abs().to(self.complex_dtype)
             state = state / torch.linalg.vector_norm(state, dim=-1, keepdim=True).clamp_min(1e-12)
+        return state
+
+    def forward(self, noise: torch.Tensor, labels: torch.Tensor | None = None):
+        state = self.statevector(noise, labels=labels)
         psi = state.unsqueeze(-1)
         rho = psi @ psi.mH
         return rho

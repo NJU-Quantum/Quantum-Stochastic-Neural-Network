@@ -8,11 +8,20 @@ from qgan.encoding import (
     pad_density_dimension,
     padding_mass,
     probability_amplitude_encode,
+    probability_amplitude_state,
     probabilities_from_density,
 )
 
 
 class ProbabilityEncodingTests(unittest.TestCase):
+    def test_statevector_encoding_matches_density_encoding(self):
+        pixels = torch.rand(3, 16)
+        probabilities, state = probability_amplitude_state(pixels)
+        expected_probabilities, expected_state, rho = probability_amplitude_encode(pixels)
+        self.assertTrue(torch.equal(probabilities, expected_probabilities))
+        self.assertTrue(torch.equal(state, expected_state))
+        self.assertTrue(torch.allclose(state @ state.mH, rho))
+
     def test_probability_amplitude_encoding_is_physical(self):
         pixels = torch.tensor([[0.0, 1.0, 3.0], [2.0, 0.0, 2.0]])
         probabilities, psi, rho = probability_amplitude_encode(pixels)

@@ -1,0 +1,29 @@
+experiment:
+  name: mnist0_probability_autoencoder_128
+  seed: 0
+  output_dir: outputs/autoencoder/mnist0_ae128_balanced
+
+data:
+  dataset: mnist
+  root: datasets
+  digits: [0]
+  samples_per_class: 1000
+  validation_fraction: 0.1
+  download: false
+
+model:
+  latent_dim: 128
+  base_channels: 16
+  latent_activation: softplus_l1
+
+training:
+  epochs: 50
+  batch_size: 64
+  lr: 0.001
+  grad_clip: 5.0
+  latent_balance_weight: 0.05
+  latent_variance_weight: 10.0
+  latent_target_std: 0.005
+
+runtime:
+  device: cuda

@@ -8,3 +8,4 @@ misc/
 datasets/
 outputs/
 tmp/
+.venv_qsnn/

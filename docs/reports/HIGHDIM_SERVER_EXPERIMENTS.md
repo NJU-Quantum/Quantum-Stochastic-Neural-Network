@@ -90,7 +90,9 @@ python scripts/run_highdim_comparison.py \
   --resume
 ```
 
-脚本只会从存在 `metrics.csv` 与 `checkpoint_latest.pt` 的任务继续；遇到不完整且无法确认的目录会停止，避免覆盖正式结果。Autoencoder 阶段目前以 `checkpoint_best.pt` 为完成标志，不会把一次短 smoke run误当作正式模型，因此 smoke test 必须使用单独的 `--autoencoder-root`。
+脚本只会从存在 `metrics.csv` 与 `checkpoint_latest.pt` 的任务继续；遇到不完整且无法确认的目录会停止，避免覆盖正式结果。
+
+runner 对会话断开有防护：训练子进程运行在独立会话中（`start_new_session`），终端或 SSH 断开时 runner 捕获 SIGHUP 并把输出转入 `logs/runner.log` 继续运行，不会再出现整组任务被 SIGHUP 杀死、`runner_status.json` 停留在 `running` 的情况（2026-07-16 dim256 中断的原因，见 `Configs_结果核查与性能报告_20260727.md`）。收到 SIGTERM/Ctrl+C 时会终止子进程并把状态写为 `interrupted`。长时间运行仍建议配合 `nohup` 或 `tmux` 启动。Autoencoder 阶段目前以 `checkpoint_best.pt` 为完成标志，不会把一次短 smoke run误当作正式模型，因此 smoke test 必须使用单独的 `--autoencoder-root`。
 
 ## 单任务调试
 

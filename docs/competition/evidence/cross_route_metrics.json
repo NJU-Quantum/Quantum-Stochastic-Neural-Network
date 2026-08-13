@@ -1,0 +1,91 @@
+{
+  "dataset": {
+    "samples": 144,
+    "train_samples": 96,
+    "test_samples": 48,
+    "seed": 23
+  },
+  "classical": [
+    {
+      "method": "LogisticRegression(x,y)",
+      "train_seconds": 0.008552749990485609,
+      "test_predict_seconds": 0.00015529105439782143,
+      "test_accuracy": 0.5,
+      "test_log_loss": 0.6826827817619532
+    },
+    {
+      "method": "LogisticRegression(x,y,r2,xy)",
+      "train_seconds": 0.000853791949339211,
+      "test_predict_seconds": 0.00011662498582154512,
+      "test_accuracy": 1.0,
+      "test_log_loss": 0.06065924930895999
+    },
+    {
+      "method": "RBF-SVM(x,y)",
+      "train_seconds": 0.0036344589898362756,
+      "test_predict_seconds": 0.0003173330333083868,
+      "test_accuracy": 1.0,
+      "test_log_loss": 0.03774742556387952
+    }
+  ],
+  "generic_quantum": {
+    "algorithm": "WuYue-native variational quantum classifier",
+    "train_accuracy": 1.0,
+    "test_accuracy": 1.0,
+    "training_seconds": 4.522986582946032,
+    "parameters": 8,
+    "wuyue_backend_max_abs_error": 3.3306690738754696e-16,
+    "cloud_simulator": {
+      "device_id": "WuYue-QPUSim-FullAmpSim",
+      "task_id": "2608140MSS8C2UB01APUH2W4T1C3B1SW",
+      "success": true,
+      "status": "计算成功",
+      "counts": {
+        "000000000": "7",
+        "000000100": "1",
+        "000001000": "20",
+        "000010000": "494",
+        "000010100": "1",
+        "000011000": "492",
+        "000011100": "9"
+      },
+      "decoded": {
+        "shots": 1024,
+        "p0": 0.02734375,
+        "p1": 0.97265625,
+        "pred": 1
+      },
+      "probabilities": {
+        "000000000": "0.00683",
+        "000000100": "0.00098",
+        "000001000": "0.01953",
+        "000010000": "0.48242",
+        "000010100": "0.00098",
+        "000011000": "0.48047",
+        "000011100": "0.00879"
+      },
+      "raw_result": "{'000010000': 494, '000011000': 492, '000001000': 20, '000011100': 9, '000000000': 7, '000000100': 1, '000010100': 1}"
+    },
+    "baihua_submission": {
+      "device_id": "WuYue-QPU-Baihua",
+      "success": false,
+      "status": "submission_rejected",
+      "error": "任务执行失败：维护中",
+      "attempted_at": 1786640429
+    }
+  },
+  "photonic": {
+    "spins": 1000,
+    "independent_couplings": 10644,
+    "classical_reservoir_test_accuracy": 1.0,
+    "sa_accuracy_samples": 8,
+    "sa_accuracy": 0.875,
+    "cim_task_id": "2608130MSS0TJIC01AZ4XHUMYTD0QZZL",
+    "cim_prediction": 0,
+    "expected_label": 0,
+    "cim_solutions": 10,
+    "cim_best_energy": -39794.0,
+    "sa_best_energy_same_sample": -37098.0
+  },
+  "comparison_warning": "Photonic, VQC and classical entries do not share identical hardware budgets or sample coverage; no quantum advantage claim is made."
+}

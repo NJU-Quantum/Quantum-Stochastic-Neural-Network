@@ -1,0 +1,2 @@
+# Install the official local WuYue wheel with install_official_sdks.sh.
+python-dotenv>=1.0,<2

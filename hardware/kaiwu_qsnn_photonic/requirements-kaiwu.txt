@@ -1,0 +1,6 @@
+# Match the official Kaiwu-PyTorch-Plugin environment documented upstream.
+# Install the WuYue-provided Kaiwu wheel before this file; do not fetch the
+# identically-versioned public PyPI build.
+numpy==2.2.6
+torch==2.7.0
+kaiwu-torch-plugin @ git+https://github.com/qboson/kaiwu-pytorch-plugin.git@82bc56a86df9ccb2078ee07cafcf64019a0d4df0

@@ -1,0 +1,16 @@
+{
+  "platform": "Kaiwu coherent photonic Ising/Boltzmann sampler",
+  "sampler": "local",
+  "config": {
+    "bins_per_axis": 4,
+    "num_hidden": 8,
+    "output_penalty": 1.5,
+    "seed": 7
+  },
+  "train_samples": 192,
+  "test_samples": 48,
+  "test_accuracy": 0.8541666865348816,
+  "final_objective": -0.6432113299767176,
+  "checkpoint": "/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/hardware/kaiwu_qsnn_photonic/outputs/photonic_qsnn_checkpoint.pt",
+  "ising_matrix": "/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/hardware/kaiwu_qsnn_photonic/outputs/photonic_qsnn_ising.npy"
+}

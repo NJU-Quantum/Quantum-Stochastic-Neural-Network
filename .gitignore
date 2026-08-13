@@ -9,3 +9,10 @@ datasets/
 outputs/
 tmp/
 .venv_qsnn/
+hardware/quafu_qsnn_16q/.quafu_token
+hardware/quafu_qsnn_16q/.venv/
+hardware/quafu_qsnn_16q/outputs/*.json
+*.baiduyun.uploading.cfg
+.env
+hardware/.venv-cloud/
+hardware/.venv-kaiwu/

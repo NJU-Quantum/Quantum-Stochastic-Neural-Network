@@ -1,0 +1,43 @@
+{
+  "matrix": "/Users/hronrad/codes/py/quantum/Quantum-Stochastic-Neural-Network/hardware/kaiwu_qsnn_photonic/outputs/photonic_qsnn_ising.npy",
+  "shape": [
+    21,
+    21
+  ],
+  "timestamp": 1786620386,
+  "results": {
+    "cim": {
+      "solver": "Kaiwu CIM",
+      "solutions": 2,
+      "variables": 21,
+      "best_energy": 2.3935159211778227,
+      "mean_energy": 2.4309877849245822,
+      "best_solution": [
+        -1,
+        -1,
+        1,
+        1,
+        -1,
+        -1,
+        1,
+        1,
+        1,
+        1,
+        -1,
+        1,
+        1,
+        1,
+        -1,
+        1,
+        1,
+        -1,
+        -1,
+        -1,
+        1
+      ],
+      "device_id": "WuYue-QPU-Qboson-1000",
+      "task_name": "QSNNPhoto1000_260813",
+      "task_id": "2608130MSRWN4V801INW39DULZIWOJAD"
+    }
+  }
+}

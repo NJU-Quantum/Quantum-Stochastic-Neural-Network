@@ -1,0 +1,109 @@
+{
+  "architecture": "structured coherent-reservoir dissipative-attractor Ising QSNN",
+  "layout": {
+    "input_nodes": 128,
+    "reservoir_width": 256,
+    "reservoir_layers": 3,
+    "sink_nodes_per_class": 51
+  },
+  "model_spins": 999,
+  "bias_spins": 1,
+  "ising_shape": [
+    1000,
+    1000
+  ],
+  "nonzero_matrix_entries": 21288,
+  "independent_couplings": 10644,
+  "coefficient_format": "signed-int8 stored as int16",
+  "coefficient_min": -127,
+  "coefficient_max": 127,
+  "classical_reservoir_test_accuracy": 1.0,
+  "conditioned_sample_index": 320,
+  "conditioned_xy": [
+    0.10590822206112778,
+    0.33879234533353103
+  ],
+  "conditioned_label": 0,
+  "timestamp": 1786627123,
+  "sa": {
+    "evaluated_samples": 8,
+    "accuracy": 0.875,
+    "mean_input_match_fraction": 0.93226171875,
+    "passed": true,
+    "cases": [
+      {
+        "sample_index": 320,
+        "label": 0,
+        "pred": 0,
+        "class1_fraction": 0.0,
+        "input_match_fraction": 0.937984375,
+        "best_energy": -37098.0
+      },
+      {
+        "sample_index": 321,
+        "label": 0,
+        "pred": 0,
+        "class1_fraction": 0.001,
+        "input_match_fraction": 0.9466328125,
+        "best_energy": -37202.0
+      },
+      {
+        "sample_index": 322,
+        "label": 1,
+        "pred": 1,
+        "class1_fraction": 1.0,
+        "input_match_fraction": 0.9352265625,
+        "best_energy": -37806.0
+      },
+      {
+        "sample_index": 323,
+        "label": 0,
+        "pred": 0,
+        "class1_fraction": 0.002,
+        "input_match_fraction": 0.945671875,
+        "best_energy": -36678.0
+      },
+      {
+        "sample_index": 324,
+        "label": 0,
+        "pred": 0,
+        "class1_fraction": 0.003,
+        "input_match_fraction": 0.922203125,
+        "best_energy": -37618.0
+      },
+      {
+        "sample_index": 325,
+        "label": 0,
+        "pred": 0,
+        "class1_fraction": 0.003,
+        "input_match_fraction": 0.9149375,
+        "best_energy": -37258.0
+      },
+      {
+        "sample_index": 326,
+        "label": 1,
+        "pred": 1,
+        "class1_fraction": 0.998,
+        "input_match_fraction": 0.932484375,
+        "best_energy": -36194.0
+      },
+      {
+        "sample_index": 327,
+        "label": 0,
+        "pred": 1,
+        "class1_fraction": 0.743,
+        "input_match_fraction": 0.922953125,
+        "best_energy": -36866.0
+      }
+    ]
+  },
+  "cim": {
+    "pred": 0,
+    "class1_fraction": 0.0,
+    "solutions": 10,
+    "best_energy": -39794.0,
+    "device_id": "WuYue-QPU-Qboson-1000",
+    "task_name": "LargeQSNN1000Q8_260813",
+    "task_id": "2608130MSS0TJIC01AZ4XHUMYTD0QZZL"
+  }
+}

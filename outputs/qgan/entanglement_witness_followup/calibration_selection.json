@@ -1,0 +1,30 @@
+{
+  "qsnn": [
+    {
+      "candidate": "q0_m90_d2_g5",
+      "checkpoint_source": "best_ema",
+      "mean_normalized_margin": 0.3044642759474079,
+      "std_normalized_margin": 0.02317928201712826
+    },
+    {
+      "candidate": "q2_m99_d2_g5",
+      "checkpoint_source": "best_ema",
+      "mean_normalized_margin": 0.29779502036210825,
+      "std_normalized_margin": 0.01928412013967394
+    }
+  ],
+  "vqc": [
+    {
+      "candidate": "v0_d2_g5",
+      "checkpoint_source": "best_instant",
+      "mean_normalized_margin": 0.16093090823186887,
+      "std_normalized_margin": 0.06289950946697367
+    },
+    {
+      "candidate": "v3_d2_g10",
+      "checkpoint_source": "best_instant",
+      "mean_normalized_margin": 0.15532604139940093,
+      "std_normalized_margin": 0.055575592888868375
+    }
+  ]
+}

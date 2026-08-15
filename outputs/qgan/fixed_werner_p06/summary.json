@@ -1,0 +1,189 @@
+{
+  "target": {
+    "p": 0.6,
+    "fidelity": 1.0,
+    "trace_distance": 0.0,
+    "purity": 0.5200000000000001,
+    "purity_error": 0.0,
+    "bell_population": 0.7000000000000003,
+    "bell_population_error": 0.0,
+    "negativity": 0.20000000000000004,
+    "negativity_error": 0.0,
+    "pauli_correlation_mae": 0.0,
+    "helstrom_success": 0.5,
+    "trace_drift": 0.0,
+    "hermiticity_drift": 0.0,
+    "min_eigenvalue": 0.09999999999999998
+  },
+  "capacity_check": {
+    "fidelity": {
+      "mean": 0.9999999999999781,
+      "std": 6.849293282988759e-14
+    },
+    "trace_distance": {
+      "mean": 4.3671327788940936e-08,
+      "std": 1.381008629816627e-07
+    }
+  },
+  "models": {
+    "qsnn": {
+      "fidelity": {
+        "mean": 0.6593058688236247,
+        "std": 0.10484088271848428
+      },
+      "trace_distance": {
+        "mean": 0.5211931061221146,
+        "std": 0.09694721576268475
+      },
+      "purity_error": {
+        "mean": 0.25970955990392397,
+        "std": 0.09731910569755721
+      },
+      "bell_population_error": {
+        "mean": 0.19094416069412185,
+        "std": 0.16583304664222517
+      },
+      "negativity_error": {
+        "mean": 0.08935304238221362,
+        "std": 0.05324289626630598
+      },
+      "pauli_correlation_mae": {
+        "mean": 0.2850541808026491,
+        "std": 0.20174326971230616
+      },
+      "best_fidelity": {
+        "mean": 0.8865528771035793,
+        "std": 0.03332465199217657
+      },
+      "min_trace_distance": {
+        "mean": 0.2442379816152645,
+        "std": 0.04549859182946967
+      },
+      "final_window_fidelity": {
+        "mean": 0.6417863346336496,
+        "std": 0.06751094646474061
+      },
+      "final_window_trace_distance": {
+        "mean": 0.5239316363634314,
+        "std": 0.06038611405407041
+      },
+      "seconds": {
+        "mean": 48.02770700000692,
+        "std": 6.764078693538808
+      },
+      "success_rate_fidelity_099": 0.0,
+      "success_rate_trace_distance_005": 0.0
+    },
+    "vqc": {
+      "fidelity": {
+        "mean": 0.6728833826554016,
+        "std": 0.11271461102848872
+      },
+      "trace_distance": {
+        "mean": 0.4888390911577445,
+        "std": 0.13557152206198902
+      },
+      "purity_error": {
+        "mean": 0.2714611968878057,
+        "std": 0.13219550814644446
+      },
+      "bell_population_error": {
+        "mean": 0.16839300767769919,
+        "std": 0.11831558589232728
+      },
+      "negativity_error": {
+        "mean": 0.1096664047227199,
+        "std": 0.06595942553551892
+      },
+      "pauli_correlation_mae": {
+        "mean": 0.26165882518719885,
+        "std": 0.14572097812020354
+      },
+      "best_fidelity": {
+        "mean": 0.840781729594085,
+        "std": 0.015511634346123775
+      },
+      "min_trace_distance": {
+        "mean": 0.26040710521063154,
+        "std": 0.038479149247615196
+      },
+      "final_window_fidelity": {
+        "mean": 0.6539153814554364,
+        "std": 0.0543102085136015
+      },
+      "final_window_trace_distance": {
+        "mean": 0.507452982262135,
+        "std": 0.05305189993776178
+      },
+      "seconds": {
+        "mean": 58.72983952998184,
+        "std": 6.871207700606656
+      },
+      "success_rate_fidelity_099": 0.0,
+      "success_rate_trace_distance_005": 0.0
+    }
+  },
+  "config": {
+    "experiment": {
+      "name": "fixed_werner_p06",
+      "output_dir": "outputs/qgan/fixed_werner_p06",
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "target": {
+      "family": "werner_psi_plus",
+      "p": 0.6
+    },
+    "generator": {
+      "system_qubits": 2,
+      "environment_qubits": 2,
+      "layers": 6,
+      "alternating_entanglement": true
+    },
+    "discriminators": {
+      "qsnn": {
+        "hidden_dim": 4,
+        "coherent_time": 1.0,
+        "input_hidden_time": 1.0,
+        "hidden_output_time": 1.0,
+        "chebyshev_order": 64,
+        "chebyshev_tol": 1e-10,
+        "init_h": 0.05,
+        "target_layer_mass": 0.9
+      },
+      "vqc": {
+        "layers": 8
+      }
+    },
+    "training": {
+      "epochs": 400,
+      "discriminator_steps": 1,
+      "generator_steps": 3,
+      "lr_g": 0.01,
+      "lr_d": 0.01,
+      "grad_clip": 5.0,
+      "record_every": 5,
+      "capacity_steps": 800,
+      "capacity_lr": 0.02
+    },
+    "runtime": {
+      "device": "cpu",
+      "dtype": "float64"
+    }
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch": "2.12.1+cu132",
+    "cuda": true
+  }
+}

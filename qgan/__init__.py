@@ -13,7 +13,23 @@ from .encoding import (
     probability_amplitude_encode,
     probabilities_from_density,
 )
-from .generators import PQCGenerator
+from .generators import ConditionalPurifiedPQCGenerator, PQCGenerator, PurifiedPQCGenerator
+from .entanglement_witness import (
+    SeparableMixtureGenerator,
+    calibrated_witness,
+    certified_separable_score_bound,
+    effective_observable,
+    observable_score,
+    pauli_coefficients,
+    werner_psi_plus_witness,
+)
+from .mixed_state_discriminators import (
+    AncillaVQCDiscriminator,
+    ConditionalAncillaVQCDiscriminator,
+    ConditionalLayeredQSNNDiscriminator,
+    LayeredQSNNDiscriminator,
+)
+from .mixed_states import bell_population, negativity, pauli_correlations, werner_state
 from .checkpoint import load_checkpoint, runtime_metadata, save_checkpoint
 from .metrics import (
     density_fidelity,
@@ -40,6 +56,13 @@ __all__ = [
     "QSNNDiscriminator",
     "VQCDiscriminator",
     "PQCGenerator",
+    "PurifiedPQCGenerator",
+    "ConditionalPurifiedPQCGenerator",
+    "SeparableMixtureGenerator",
+    "LayeredQSNNDiscriminator",
+    "AncillaVQCDiscriminator",
+    "ConditionalLayeredQSNNDiscriminator",
+    "ConditionalAncillaVQCDiscriminator",
     "ProbabilityAutoencoder",
     "QGANTrainer",
     "area_downsample",
@@ -66,4 +89,14 @@ __all__ = [
     "trace_z_value",
     "total_variation_distance",
     "trainable_parameter_count",
+    "werner_state",
+    "bell_population",
+    "negativity",
+    "pauli_correlations",
+    "calibrated_witness",
+    "certified_separable_score_bound",
+    "effective_observable",
+    "observable_score",
+    "pauli_coefficients",
+    "werner_psi_plus_witness",
 ]

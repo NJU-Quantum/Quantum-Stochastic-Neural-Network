@@ -1,0 +1,49 @@
+experiment:
+  name: entanglement_witness_qgan
+  output_dir: outputs/qgan/entanglement_witness_qgan
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+target:
+  werner_p: 0.6
+  dense_points: 101
+  separable_control_p: 0.2
+  boundary_p: 0.3333333333333333
+
+generator:
+  components: 16
+  capacity_steps: 1500
+  capacity_lr: 0.01
+
+discriminators:
+  qsnn:
+    hidden_dim: 4
+    coherent_time: 1.0
+    input_hidden_time: 1.0
+    hidden_output_time: 1.0
+    chebyshev_order: 64
+    chebyshev_tol: 1.0e-10
+    init_h: 0.05
+    target_layer_mass: 0.9
+  vqc:
+    layers: 8
+
+training:
+  epochs: 1000
+  discriminator_steps: 1
+  generator_steps: 5
+  lr_g: 0.002
+  lr_d: 0.002
+  grad_clip: 5.0
+  record_every: 20
+  validation_product_states: 2048
+  lr_decay_start: 300
+  lr_decay_factor: 0.3
+
+certification:
+  tolerance: 5.0e-4
+  max_cells: 200000
+  detection_tolerance: 1.0e-6
+
+runtime:
+  device: cpu
+  dtype: float64

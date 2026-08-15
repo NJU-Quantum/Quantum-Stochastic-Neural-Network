@@ -1,0 +1,49 @@
+experiment:
+  name: conditional_werner_family
+  output_dir: outputs/qgan/conditional_werner_family
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+conditions:
+  train: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+  validation: [0.025, 0.225, 0.425, 0.625, 0.825]
+  interpolation: [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95]
+  boundary: [0.28, 0.30, 0.32, 0.3333333333333333, 0.35, 0.37, 0.40]
+  dense_points: 101
+
+generator:
+  system_qubits: 2
+  environment_qubits: 2
+  layers: 8
+  alternating_entanglement: true
+
+discriminators:
+  qsnn:
+    hidden_dim: 4
+    coherent_time: 1.0
+    input_hidden_time: 1.0
+    hidden_output_time: 1.0
+    coherent_backend: exact
+    chebyshev_order: 64  # retained for base-class compatibility; unused by exact conditional path
+    chebyshev_tol: 1.0e-10
+    init_h: 0.05
+    target_layer_mass: 0.9
+  vqc:
+    layers: 8
+
+training:
+  epochs: 600
+  discriminator_steps: 1
+  generator_steps: 3
+  lr_g: 0.005
+  lr_d: 0.005
+  grad_clip: 5.0
+  record_every: 10
+  capacity_steps: 1500
+  capacity_lr: 0.01
+  ema_decay: 0.995
+  lr_decay_start: 300
+  lr_decay_factor: 0.3
+
+runtime:
+  device: cpu
+  dtype: float64

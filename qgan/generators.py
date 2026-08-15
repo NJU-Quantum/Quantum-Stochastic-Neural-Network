@@ -206,3 +206,177 @@ class PQCGenerator(nn.Module):
         psi = state.unsqueeze(-1)
         rho = psi @ psi.mH
         return rho
+
+
+class PurifiedPQCGenerator(nn.Module):
+    """Generate a fixed mixed state through a trainable purification.
+
+    The first ``system_qubits`` are retained and the remaining qubits are
+    traced out.  Starting from a pure state on system plus environment is a
+    convenient differentiable parameterization of a physical mixed state; two
+    environment qubits are sufficient for an arbitrary two-qubit density
+    matrix.
+    """
+
+    def __init__(
+        self,
+        system_qubits: int = 2,
+        environment_qubits: int = 2,
+        n_layers: int = 6,
+        alternating_entanglement: bool = True,
+        real_dtype: torch.dtype = torch.float32,
+    ):
+        super().__init__()
+        if system_qubits <= 0 or environment_qubits <= 0 or n_layers <= 0:
+            raise ValueError("qubit counts and n_layers must be positive")
+        self.system_qubits = int(system_qubits)
+        self.environment_qubits = int(environment_qubits)
+        self.n_qubits = self.system_qubits + self.environment_qubits
+        self.system_dim = 1 << self.system_qubits
+        self.environment_dim = 1 << self.environment_qubits
+        self.state_dim = 1 << self.n_qubits
+        self.n_layers = int(n_layers)
+        self.alternating_entanglement = bool(alternating_entanglement)
+        self.ry_angles = nn.Parameter(
+            0.05 * torch.randn(self.n_layers, self.n_qubits, dtype=real_dtype)
+        )
+        self.rz_angles = nn.Parameter(
+            0.05 * torch.randn(self.n_layers, self.n_qubits, dtype=real_dtype)
+        )
+
+    @property
+    def complex_dtype(self):
+        return torch.complex128 if self.ry_angles.dtype == torch.float64 else torch.complex64
+
+    def statevector(self) -> torch.Tensor:
+        state = torch.zeros(
+            1,
+            self.state_dim,
+            device=self.ry_angles.device,
+            dtype=self.complex_dtype,
+        )
+        state[:, 0] = 1.0
+        for layer in range(self.n_layers):
+            for qubit in range(self.n_qubits):
+                state = _apply_single_qubit_gate(
+                    state,
+                    _ry(self.ry_angles[layer, qubit], self.complex_dtype),
+                    qubit,
+                    self.n_qubits,
+                )
+                state = _apply_single_qubit_gate(
+                    state,
+                    _rz(self.rz_angles[layer, qubit], self.complex_dtype),
+                    qubit,
+                    self.n_qubits,
+                )
+            reverse = self.alternating_entanglement and layer % 2 == 1
+            for control in range(self.n_qubits):
+                target = (
+                    (control - 1) % self.n_qubits
+                    if reverse
+                    else (control + 1) % self.n_qubits
+                )
+                permutation = _cnot_permutation(
+                    self.n_qubits,
+                    control,
+                    target,
+                    state.device,
+                )
+                state = state[:, permutation]
+        state = state.squeeze(0)
+        return state / torch.linalg.vector_norm(state).clamp_min(1e-12)
+
+    def forward(self) -> torch.Tensor:
+        purification = self.statevector().reshape(self.system_dim, self.environment_dim)
+        return purification @ purification.mH
+
+
+class ConditionalPurifiedPQCGenerator(nn.Module):
+    """Conditional mixed-state generator with layer-wise condition re-uploading."""
+
+    def __init__(
+        self,
+        system_qubits: int = 2,
+        environment_qubits: int = 2,
+        n_layers: int = 6,
+        alternating_entanglement: bool = True,
+        real_dtype: torch.dtype = torch.float32,
+    ):
+        super().__init__()
+        if system_qubits <= 0 or environment_qubits <= 0 or n_layers <= 0:
+            raise ValueError("qubit counts and n_layers must be positive")
+        self.system_qubits = int(system_qubits)
+        self.environment_qubits = int(environment_qubits)
+        self.n_qubits = self.system_qubits + self.environment_qubits
+        self.system_dim = 1 << self.system_qubits
+        self.environment_dim = 1 << self.environment_qubits
+        self.state_dim = 1 << self.n_qubits
+        self.n_layers = int(n_layers)
+        self.alternating_entanglement = bool(alternating_entanglement)
+        shape = (self.n_layers, self.n_qubits)
+        self.ry_angles = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
+        self.rz_angles = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
+        self.ry_condition = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
+        self.rz_condition = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
+
+    @property
+    def complex_dtype(self):
+        return torch.complex128 if self.ry_angles.dtype == torch.float64 else torch.complex64
+
+    def _conditions(self, conditions: torch.Tensor) -> torch.Tensor:
+        values = torch.as_tensor(
+            conditions,
+            device=self.ry_angles.device,
+            dtype=self.ry_angles.dtype,
+        ).reshape(-1)
+        if not bool(((values >= 0) & (values <= 1)).all()):
+            raise ValueError("conditions must lie in [0, 1]")
+        return 2.0 * values - 1.0
+
+    def statevector(self, conditions: torch.Tensor) -> torch.Tensor:
+        normalized = self._conditions(conditions)
+        batch = normalized.shape[0]
+        state = torch.zeros(
+            batch,
+            self.state_dim,
+            device=self.ry_angles.device,
+            dtype=self.complex_dtype,
+        )
+        state[:, 0] = 1.0
+        for layer in range(self.n_layers):
+            for qubit in range(self.n_qubits):
+                ry_angle = self.ry_angles[layer, qubit] + normalized * self.ry_condition[layer, qubit]
+                rz_angle = self.rz_angles[layer, qubit] + normalized * self.rz_condition[layer, qubit]
+                state = _apply_single_qubit_gate(
+                    state,
+                    _ry(ry_angle, self.complex_dtype),
+                    qubit,
+                    self.n_qubits,
+                )
+                state = _apply_single_qubit_gate(
+                    state,
+                    _rz(rz_angle, self.complex_dtype),
+                    qubit,
+                    self.n_qubits,
+                )
+            reverse = self.alternating_entanglement and layer % 2 == 1
+            for control in range(self.n_qubits):
+                target = (
+                    (control - 1) % self.n_qubits
+                    if reverse
+                    else (control + 1) % self.n_qubits
+                )
+                permutation = _cnot_permutation(
+                    self.n_qubits,
+                    control,
+                    target,
+                    state.device,
+                )
+                state = state[:, permutation]
+        return state / torch.linalg.vector_norm(state, dim=-1, keepdim=True).clamp_min(1e-12)
+
+    def forward(self, conditions: torch.Tensor) -> torch.Tensor:
+        state = self.statevector(conditions)
+        purification = state.reshape(-1, self.system_dim, self.environment_dim)
+        return purification @ purification.mH

@@ -1,0 +1,77 @@
+experiment:
+  name: entanglement_witness_followup
+  output_dir: outputs/qgan/entanglement_witness_followup
+
+target:
+  calibration_p: 0.6
+  formal_ps: [0.6, 0.36]
+  dense_points: 101
+
+seeds:
+  calibration: [10, 11, 12]
+  validation: [13, 14, 15, 16, 17]
+  formal: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+generator:
+  components: 16
+
+base_discriminators:
+  qsnn:
+    hidden_dim: 4
+    coherent_time: 1.0
+    input_hidden_time: 1.0
+    hidden_output_time: 1.0
+    chebyshev_order: 64
+    chebyshev_tol: 1.0e-10
+    init_h: 0.05
+    target_layer_mass: 0.9
+  vqc:
+    layers: 8
+
+training:
+  calibration_epochs: 600
+  validation_epochs: 1000
+  formal_epochs: 1000
+  discriminator_steps: 1
+  lr_g: 0.002
+  grad_clip: 5.0
+  record_every: 20
+  validation_product_states: 2048
+  ema_decay: 0.995
+  lr_decay_fraction: 0.3
+  lr_decay_factor: 0.3
+
+calibration_candidates:
+  qsnn:
+    - {name: q0_m90_d2_g5, target_layer_mass: 0.90, lr_d: 0.0020, generator_steps: 5}
+    - {name: q1_m97_d2_g5, target_layer_mass: 0.97, lr_d: 0.0020, generator_steps: 5}
+    - {name: q2_m99_d2_g5, target_layer_mass: 0.99, lr_d: 0.0020, generator_steps: 5}
+    - {name: q3_m99_d1_g5, target_layer_mass: 0.99, lr_d: 0.0010, generator_steps: 5}
+    - {name: q4_m99_d1_g10, target_layer_mass: 0.99, lr_d: 0.0010, generator_steps: 10}
+    - {name: q5_m97_d1_g10, target_layer_mass: 0.97, lr_d: 0.0010, generator_steps: 10}
+  vqc:
+    - {name: v0_d2_g5, lr_d: 0.0020, generator_steps: 5}
+    - {name: v1_d1_g5, lr_d: 0.0010, generator_steps: 5}
+    - {name: v2_d05_g5, lr_d: 0.0005, generator_steps: 5}
+    - {name: v3_d2_g10, lr_d: 0.0020, generator_steps: 10}
+    - {name: v4_d1_g10, lr_d: 0.0010, generator_steps: 10}
+    - {name: v5_d05_g10, lr_d: 0.0005, generator_steps: 10}
+
+selection:
+  calibration_top_k: 2
+  primary_metric: normalized_margin
+  preferred_checkpoint_sources: [best_ema, best_instant]
+
+certification:
+  tolerance: 5.0e-4
+  max_cells: 200000
+  detection_tolerance: 1.0e-6
+
+shots:
+  per_pauli_setting: [100, 500, 1000, 5000, 10000]
+  repetitions: 2000
+  confidence_z: 1.96
+
+runtime:
+  device: cpu
+  dtype: float64

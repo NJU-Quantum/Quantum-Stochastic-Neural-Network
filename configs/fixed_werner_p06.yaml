@@ -1,0 +1,42 @@
+experiment:
+  name: fixed_werner_p06
+  output_dir: outputs/qgan/fixed_werner_p06
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+target:
+  family: werner_psi_plus
+  p: 0.6
+
+generator:
+  system_qubits: 2
+  environment_qubits: 2
+  layers: 6
+  alternating_entanglement: true
+
+discriminators:
+  qsnn:
+    hidden_dim: 4
+    coherent_time: 1.0
+    input_hidden_time: 1.0
+    hidden_output_time: 1.0
+    chebyshev_order: 64
+    chebyshev_tol: 1.0e-10
+    init_h: 0.05
+    target_layer_mass: 0.9
+  vqc:
+    layers: 8
+
+training:
+  epochs: 400
+  discriminator_steps: 1
+  generator_steps: 3
+  lr_g: 0.01
+  lr_d: 0.01
+  grad_clip: 5.0
+  record_every: 5
+  capacity_steps: 800
+  capacity_lr: 0.02
+
+runtime:
+  device: auto
+  dtype: float64

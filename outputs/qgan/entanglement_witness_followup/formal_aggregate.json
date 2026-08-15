@@ -1,0 +1,178 @@
+{
+  "0.36": {
+    "qsnn": {
+      "certified_margin": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "normalized_margin": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "boundary_error": {
+        "mean": NaN,
+        "std": NaN
+      },
+      "pauli_cosine": {
+        "mean": NaN,
+        "std": NaN
+      },
+      "target_output_mass": {
+        "mean": 0.8108567005540943,
+        "std": 0.0003073987057666823
+      },
+      "seconds": {
+        "mean": 36.80305517999223,
+        "std": 0.6904230780261589
+      },
+      "certified_successes": 0,
+      "runs": 20
+    },
+    "vqc": {
+      "certified_margin": {
+        "mean": -0.09185266853573716,
+        "std": 0.049298587687174565
+      },
+      "normalized_margin": {
+        "mean": -0.08863471149316351,
+        "std": 0.036954742216118774
+      },
+      "boundary_error": {
+        "mean": 0.13033959944726584,
+        "std": 0.08131352940682322
+      },
+      "pauli_cosine": {
+        "mean": 0.9454991056352879,
+        "std": 0.05226741144904263
+      },
+      "target_output_mass": {
+        "mean": 1.0,
+        "std": 5.678212268286615e-16
+      },
+      "seconds": {
+        "mean": 54.3548237500363,
+        "std": 0.35220901595507054
+      },
+      "certified_successes": 0,
+      "runs": 20
+    },
+    "paired": {
+      "certified_margin": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": 0.09185266853573716,
+        "qsnn_wins": 20,
+        "paired_t_p": 9.10662488277543e-08,
+        "wilcoxon_p": 1.9073486328125e-06
+      },
+      "normalized_margin": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": 0.08863471149316351,
+        "qsnn_wins": 20,
+        "paired_t_p": 1.6815940543073766e-09,
+        "wilcoxon_p": 1.9073486328125e-06
+      },
+      "boundary_error": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": NaN,
+        "qsnn_wins": 0,
+        "paired_t_p": NaN,
+        "wilcoxon_p": NaN
+      },
+      "pauli_cosine": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": NaN,
+        "qsnn_wins": 0,
+        "paired_t_p": NaN,
+        "wilcoxon_p": NaN
+      }
+    }
+  },
+  "0.6": {
+    "qsnn": {
+      "certified_margin": {
+        "mean": 0.1608419127339142,
+        "std": 0.055623500996456444
+      },
+      "normalized_margin": {
+        "mean": 0.3070129436742912,
+        "std": 0.019936392230294742
+      },
+      "boundary_error": {
+        "mean": 0.031779083039606096,
+        "std": 0.008898237006917418
+      },
+      "pauli_cosine": {
+        "mean": 0.995923904374378,
+        "std": 0.001857246470534838
+      },
+      "target_output_mass": {
+        "mean": 0.907979733982927,
+        "std": 0.02034793425417955
+      },
+      "seconds": {
+        "mean": 38.67465851998422,
+        "std": 0.7790824184501408
+      },
+      "certified_successes": 20,
+      "runs": 20
+    },
+    "vqc": {
+      "certified_margin": {
+        "mean": 0.3272124861226073,
+        "std": 0.02809798499169354
+      },
+      "normalized_margin": {
+        "mean": 0.31303104684168437,
+        "std": 0.03113847457142469
+      },
+      "boundary_error": {
+        "mean": 0.03040323149920015,
+        "std": 0.0144994928909036
+      },
+      "pauli_cosine": {
+        "mean": 0.9955537331827082,
+        "std": 0.0029977253444597087
+      },
+      "target_output_mass": {
+        "mean": 1.0000000000000004,
+        "std": 4.506149520142044e-16
+      },
+      "seconds": {
+        "mean": 53.32862947002286,
+        "std": 0.7519387227665032
+      },
+      "certified_successes": 20,
+      "runs": 20
+    },
+    "paired": {
+      "certified_margin": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": -0.1663705733886931,
+        "qsnn_wins": 0,
+        "paired_t_p": 1.6595231720291224e-09,
+        "wilcoxon_p": 1.9073486328125e-06
+      },
+      "normalized_margin": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": -0.006018103167393131,
+        "qsnn_wins": 8,
+        "paired_t_p": 0.5245634397351862,
+        "wilcoxon_p": 0.34881019592285156
+      },
+      "boundary_error": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": 0.0013758515404059396,
+        "qsnn_wins": 9,
+        "paired_t_p": 0.7437749632139196,
+        "wilcoxon_p": 0.5458755493164062
+      },
+      "pauli_cosine": {
+        "pairs": 20,
+        "mean_qsnn_minus_vqc": 0.0003701711916695383,
+        "qsnn_wins": 11,
+        "paired_t_p": 0.6625069986070131,
+        "wilcoxon_p": 0.9272785186767578
+      }
+    }
+  }
+}

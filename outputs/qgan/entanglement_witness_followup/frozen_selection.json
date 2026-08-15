@@ -1,0 +1,18 @@
+{
+  "qsnn": [
+    {
+      "candidate": "q0_m90_d2_g5",
+      "checkpoint_source": "best_ema",
+      "mean_normalized_margin": 0.3214591102013828,
+      "std_normalized_margin": 0.03402690251596223
+    }
+  ],
+  "vqc": [
+    {
+      "candidate": "v0_d2_g5",
+      "checkpoint_source": "best_ema",
+      "mean_normalized_margin": 0.30750393159080075,
+      "std_normalized_margin": 0.027648501564570445
+    }
+  ]
+}

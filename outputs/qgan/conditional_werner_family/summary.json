@@ -1,0 +1,252 @@
+{
+  "capacity_check": {
+    "train_mean_fidelity": {
+      "mean": 0.9982900128490291,
+      "std": 0.00016567535305539644
+    },
+    "interp_mean_fidelity": {
+      "mean": 0.9999382483369625,
+      "std": 1.5307738541273267e-05
+    },
+    "dense_min_fidelity": {
+      "mean": 0.9817305506874929,
+      "std": 0.0017530754216233946
+    },
+    "dense_max_trace_distance": {
+      "mean": 0.018418964458339248,
+      "std": 0.0017891871129065346
+    }
+  },
+  "models": {
+    "qsnn": {
+      "best_train_mean_fidelity": {
+        "mean": 0.850847105092521,
+        "std": 0.012696753917415371
+      },
+      "best_interpolation_mean_fidelity": {
+        "mean": 0.8553031248317048,
+        "std": 0.014724713621457202
+      },
+      "best_dense_min_fidelity": {
+        "mean": 0.7072713780564558,
+        "std": 0.053143365908989174
+      },
+      "best_dense_mean_trace_distance": {
+        "mean": 0.2736956530255526,
+        "std": 0.024364231728846532
+      },
+      "best_dense_max_trace_distance": {
+        "mean": 0.44347968429759155,
+        "std": 0.04235185389020555
+      },
+      "best_dense_purity_mae": {
+        "mean": 0.16352677244272612,
+        "std": 0.028420300724309195
+      },
+      "best_dense_bell_population_mae": {
+        "mean": 0.08504602964392213,
+        "std": 0.015234776175665973
+      },
+      "best_dense_negativity_mae": {
+        "mean": 0.07243966189500997,
+        "std": 0.021417322035824412
+      },
+      "best_dense_pauli_correlation_mae": {
+        "mean": 0.15211433010865777,
+        "std": 0.024531789041445606
+      },
+      "best_dense_condition_sensitivity": {
+        "mean": 1.7699403629355417,
+        "std": 0.4617467800360456
+      },
+      "best_dense_endpoint_trace_distance": {
+        "mean": 0.7245897913122951,
+        "std": 0.1533252400437109
+      },
+      "best_dense_entanglement_boundary_error": {
+        "mean": 0.3063333333333333,
+        "std": 0.07860590874030329
+      },
+      "final_interpolation_mean_fidelity": {
+        "mean": 0.809876010334035,
+        "std": 0.032868777928238335
+      },
+      "ema_interpolation_mean_fidelity": {
+        "mean": 0.8407256264734706,
+        "std": 0.017690874279285736
+      },
+      "seconds": {
+        "mean": 96.6385370799806,
+        "std": 8.442729503243479
+      }
+    },
+    "vqc": {
+      "best_train_mean_fidelity": {
+        "mean": 0.8281133034336587,
+        "std": 0.013619341520261122
+      },
+      "best_interpolation_mean_fidelity": {
+        "mean": 0.832171909878715,
+        "std": 0.014025378244261493
+      },
+      "best_dense_min_fidelity": {
+        "mean": 0.673250893730283,
+        "std": 0.03854607606824041
+      },
+      "best_dense_mean_trace_distance": {
+        "mean": 0.3083252470898933,
+        "std": 0.015650676507935918
+      },
+      "best_dense_max_trace_distance": {
+        "mean": 0.47083166541423455,
+        "std": 0.05644450614010578
+      },
+      "best_dense_purity_mae": {
+        "mean": 0.21464167849525,
+        "std": 0.03952469542718338
+      },
+      "best_dense_bell_population_mae": {
+        "mean": 0.10810518359188541,
+        "std": 0.049839355345490444
+      },
+      "best_dense_negativity_mae": {
+        "mean": 0.10547351747264795,
+        "std": 0.04647040370482556
+      },
+      "best_dense_pauli_correlation_mae": {
+        "mean": 0.166898187535944,
+        "std": 0.06192140049738427
+      },
+      "best_dense_condition_sensitivity": {
+        "mean": 1.9827190891723412,
+        "std": 0.44699645901444585
+      },
+      "best_dense_endpoint_trace_distance": {
+        "mean": 0.6894321129528418,
+        "std": 0.12027868791514286
+      },
+      "best_dense_entanglement_boundary_error": {
+        "mean": 0.33233333333333326,
+        "std": 0.0031622776601683824
+      },
+      "final_interpolation_mean_fidelity": {
+        "mean": 0.7947248718862657,
+        "std": 0.03554479621591983
+      },
+      "ema_interpolation_mean_fidelity": {
+        "mean": 0.8400007524371403,
+        "std": 0.02058243256893171
+      },
+      "seconds": {
+        "mean": 139.475815420039,
+        "std": 13.680556035830936
+      }
+    }
+  },
+  "config": {
+    "experiment": {
+      "name": "conditional_werner_family",
+      "output_dir": "outputs/qgan/conditional_werner_family",
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "conditions": {
+      "train": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "validation": [
+        0.025,
+        0.225,
+        0.425,
+        0.625,
+        0.825
+      ],
+      "interpolation": [
+        0.05,
+        0.15,
+        0.25,
+        0.35,
+        0.45,
+        0.55,
+        0.65,
+        0.75,
+        0.85,
+        0.95
+      ],
+      "boundary": [
+        0.28,
+        0.3,
+        0.32,
+        0.3333333333333333,
+        0.35,
+        0.37,
+        0.4
+      ],
+      "dense_points": 101
+    },
+    "generator": {
+      "system_qubits": 2,
+      "environment_qubits": 2,
+      "layers": 8,
+      "alternating_entanglement": true
+    },
+    "discriminators": {
+      "qsnn": {
+        "hidden_dim": 4,
+        "coherent_time": 1.0,
+        "input_hidden_time": 1.0,
+        "hidden_output_time": 1.0,
+        "chebyshev_order": 64,
+        "chebyshev_tol": 1e-10,
+        "init_h": 0.05,
+        "target_layer_mass": 0.9
+      },
+      "vqc": {
+        "layers": 8
+      }
+    },
+    "training": {
+      "epochs": 600,
+      "discriminator_steps": 1,
+      "generator_steps": 3,
+      "lr_g": 0.005,
+      "lr_d": 0.005,
+      "grad_clip": 5.0,
+      "record_every": 10,
+      "capacity_steps": 1500,
+      "capacity_lr": 0.01,
+      "ema_decay": 0.995,
+      "lr_decay_start": 300,
+      "lr_decay_factor": 0.3
+    },
+    "runtime": {
+      "device": "cpu",
+      "dtype": "float64"
+    }
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch": "2.12.1+cu132",
+    "cuda": true
+  }
+}

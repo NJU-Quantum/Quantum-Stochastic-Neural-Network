@@ -1,0 +1,26 @@
+{
+  "experiment": {
+    "angles_degrees": [15.0, 30.0, 45.0, 60.0, 75.0],
+    "phase_degrees": 37.0,
+    "noise_model": "depolarizing",
+    "noise_strengths": [0.0, 0.05, 0.1, 0.2, 0.3],
+    "priors": [0.5, 0.5],
+    "seeds": [0, 1, 2, 3, 4],
+    "shots": [128, 512, 1024],
+    "output_dir": "outputs/quantum_tasks/qubit_helstrom/full"
+  },
+  "qsnn": {
+    "coherent_time": 1.0,
+    "dissipative_time": 1.0,
+    "target_initial_output_mass": 0.995,
+    "coherent_during_dissipation": false,
+    "dissipative_steps": 8
+  },
+  "training": {
+    "epochs": 400,
+    "learning_rate": 0.05,
+    "leakage_penalty": 0.1,
+    "grad_clip": 10.0,
+    "log_every": 40
+  }
+}

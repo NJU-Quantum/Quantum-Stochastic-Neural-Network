@@ -266,3 +266,30 @@ conda run -n qsnn python scripts/train_qgan.py --config configs/smoke.yaml --epo
 ```
 
 每次运行会在输出目录保存配置副本、环境与参数量信息、`metrics.csv`、`metrics.json` 和最新 checkpoint。指标同时包含 Trace-Z、直接判别成功率、输出质量、leakage、梯度范数、物理性漂移、量子态距离、耗时和 CUDA 峰值显存。
+
+---
+
+## 量子原生任务：单量子比特 Helstrom 判别
+
+`tasks/quantum_state_discrimination/` 新增了直接接收量子密度矩阵的最小错误态判别实验。模型使用相干旋转与结构化 Lindblad 跳跃学习二输出 POVM，并与解析 Helstrom 上界、可训练幺正投影测量和固定 Pauli 测量比较。输出泄漏按失败处理，不通过归一化抬高成功率。
+
+快速实验：
+
+```powershell
+python scripts/run_qubit_helstrom.py --config configs/qubit_helstrom_smoke.json
+```
+
+完整五随机种子扫描：
+
+```powershell
+python scripts/run_qubit_helstrom.py --config configs/qubit_helstrom_full.json
+```
+
+详细定义和评价口径见 `tasks/quantum_state_discrimination/README.md`。
+
+当前 NumPy 参考后端已完成 125 次完整扫描，平均 Helstrom gap 为
+`0.000505874`，全部预设数值门槛通过。结果仍需正式 PyTorch/autograd 后端
+交叉验证；“硬件候选”不表示已授权提交硬件任务。简要记录见
+`docs/reports/单量子比特_Helstrom_QSNN_实验报告.md`，包含模型推导、QSNN
+作用与优势边界、代表性 POVM 和补充实验矩阵的正式报告见
+`docs/reports/单量子比特_Helstrom_QSNN_正式实验报告.md`。

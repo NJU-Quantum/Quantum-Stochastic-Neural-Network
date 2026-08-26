@@ -300,12 +300,14 @@ class ConditionalPurifiedPQCGenerator(nn.Module):
         system_qubits: int = 2,
         environment_qubits: int = 2,
         n_layers: int = 6,
+        condition_dim: int = 1,
+        condition_feature_map: str = "linear",
         alternating_entanglement: bool = True,
         real_dtype: torch.dtype = torch.float32,
     ):
         super().__init__()
-        if system_qubits <= 0 or environment_qubits <= 0 or n_layers <= 0:
-            raise ValueError("qubit counts and n_layers must be positive")
+        if system_qubits <= 0 or environment_qubits <= 0 or n_layers <= 0 or condition_dim <= 0:
+            raise ValueError("qubit counts, n_layers, and condition_dim must be positive")
         self.system_qubits = int(system_qubits)
         self.environment_qubits = int(environment_qubits)
         self.n_qubits = self.system_qubits + self.environment_qubits
@@ -313,12 +315,32 @@ class ConditionalPurifiedPQCGenerator(nn.Module):
         self.environment_dim = 1 << self.environment_qubits
         self.state_dim = 1 << self.n_qubits
         self.n_layers = int(n_layers)
+        self.condition_dim = int(condition_dim)
+        if condition_feature_map not in {"linear", "quadratic", "equivariant"}:
+            raise ValueError(
+                "condition_feature_map must be 'linear', 'quadratic', or 'equivariant'"
+            )
+        if self.condition_dim == 1 and condition_feature_map != "linear":
+            raise ValueError("scalar conditions only support the linear feature map")
+        self.condition_feature_map = condition_feature_map
+        self.condition_feature_dim = (
+            self.condition_dim
+            if condition_feature_map == "linear"
+            else (
+                self.condition_dim + self.condition_dim * (self.condition_dim + 1) // 2
+                if condition_feature_map == "quadratic"
+                else 1
+            )
+        )
         self.alternating_entanglement = bool(alternating_entanglement)
         shape = (self.n_layers, self.n_qubits)
+        condition_shape = (
+            shape if self.condition_dim == 1 else (*shape, self.condition_feature_dim)
+        )
         self.ry_angles = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
         self.rz_angles = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
-        self.ry_condition = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
-        self.rz_condition = nn.Parameter(0.05 * torch.randn(*shape, dtype=real_dtype))
+        self.ry_condition = nn.Parameter(0.05 * torch.randn(*condition_shape, dtype=real_dtype))
+        self.rz_condition = nn.Parameter(0.05 * torch.randn(*condition_shape, dtype=real_dtype))
 
     @property
     def complex_dtype(self):
@@ -329,14 +351,67 @@ class ConditionalPurifiedPQCGenerator(nn.Module):
             conditions,
             device=self.ry_angles.device,
             dtype=self.ry_angles.dtype,
-        ).reshape(-1)
-        if not bool(((values >= 0) & (values <= 1)).all()):
-            raise ValueError("conditions must lie in [0, 1]")
-        return 2.0 * values - 1.0
+        )
+        if self.condition_dim == 1:
+            values = values.reshape(-1, 1)
+            if not bool(((values >= 0) & (values <= 1)).all()):
+                raise ValueError("scalar conditions must lie in [0, 1]")
+            return 2.0 * values - 1.0
+        if values.dim() == 1:
+            values = values.unsqueeze(0)
+        if values.dim() != 2 or values.shape[-1] != self.condition_dim:
+            raise ValueError(
+                f"conditions must have shape (batch, {self.condition_dim})"
+            )
+        if not bool(((values[:, 0] >= 0) & (values[:, 0] <= 1)).all()):
+            raise ValueError("the first condition component must lie in [0, 1]")
+        if not bool(((values[:, 1:] >= -1) & (values[:, 1:] <= 1)).all()):
+            raise ValueError("remaining condition components must lie in [-1, 1]")
+        normalized = values.clone()
+        normalized[:, 0] = 2.0 * normalized[:, 0] - 1.0
+        return normalized
+
+    def _condition_features(self, normalized: torch.Tensor) -> torch.Tensor:
+        if self.condition_feature_map == "linear":
+            return normalized
+        if self.condition_feature_map == "equivariant":
+            return normalized[:, :1]
+        products = [
+            normalized[:, left] * normalized[:, right]
+            for left in range(self.condition_dim)
+            for right in range(left, self.condition_dim)
+        ]
+        return torch.cat([normalized, torch.stack(products, dim=-1)], dim=-1)
+
+    def _conditional_angles(
+        self, normalized: torch.Tensor, base: torch.Tensor, weights: torch.Tensor
+    ) -> torch.Tensor:
+        if self.condition_dim == 1:
+            return base.unsqueeze(0) + normalized[:, :, None] * weights.unsqueeze(0)
+        features = self._condition_features(normalized)
+        return base.unsqueeze(0) + torch.einsum("bc,lqc->blq", features, weights)
 
     def statevector(self, conditions: torch.Tensor) -> torch.Tensor:
         normalized = self._conditions(conditions)
-        batch = normalized.shape[0]
+        if self.condition_feature_map == "equivariant":
+            unique_p, inverse = torch.unique(normalized[:, 0], sorted=True, return_inverse=True)
+            circuit_conditions = torch.zeros(
+                unique_p.shape[0],
+                self.condition_dim,
+                device=normalized.device,
+                dtype=normalized.dtype,
+            )
+            circuit_conditions[:, 0] = unique_p
+        else:
+            circuit_conditions = normalized
+            inverse = None
+        batch = circuit_conditions.shape[0]
+        ry_angles = self._conditional_angles(
+            circuit_conditions, self.ry_angles, self.ry_condition
+        )
+        rz_angles = self._conditional_angles(
+            circuit_conditions, self.rz_angles, self.rz_condition
+        )
         state = torch.zeros(
             batch,
             self.state_dim,
@@ -346,8 +421,8 @@ class ConditionalPurifiedPQCGenerator(nn.Module):
         state[:, 0] = 1.0
         for layer in range(self.n_layers):
             for qubit in range(self.n_qubits):
-                ry_angle = self.ry_angles[layer, qubit] + normalized * self.ry_condition[layer, qubit]
-                rz_angle = self.rz_angles[layer, qubit] + normalized * self.rz_condition[layer, qubit]
+                ry_angle = ry_angles[:, layer, qubit]
+                rz_angle = rz_angles[:, layer, qubit]
                 state = _apply_single_qubit_gate(
                     state,
                     _ry(ry_angle, self.complex_dtype),
@@ -374,7 +449,24 @@ class ConditionalPurifiedPQCGenerator(nn.Module):
                     state.device,
                 )
                 state = state[:, permutation]
-        return state / torch.linalg.vector_norm(state, dim=-1, keepdim=True).clamp_min(1e-12)
+        state = state / torch.linalg.vector_norm(state, dim=-1, keepdim=True).clamp_min(1e-12)
+        if self.condition_feature_map == "equivariant":
+            # The task supplies a known relative local rotation.  Building that
+            # symmetry into the common generator prevents rotation-pool
+            # memorization while leaving the p-dependent mixed state trainable.
+            from .rotations import quaternion_to_su2
+
+            state = state[inverse]
+            rotation = quaternion_to_su2(normalized[:, 1:]).to(
+                device=state.device, dtype=self.complex_dtype
+            )
+            state = _apply_single_qubit_gate(
+                state,
+                rotation,
+                self.system_qubits - 1,
+                self.n_qubits,
+            )
+        return state
 
     def forward(self, conditions: torch.Tensor) -> torch.Tensor:
         state = self.statevector(conditions)

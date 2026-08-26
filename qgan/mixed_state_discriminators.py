@@ -268,29 +268,61 @@ class AncillaVQCDiscriminator(nn.Module):
 
 
 class ConditionalLayeredQSNNDiscriminator(LayeredQSNNDiscriminator):
-    """4-4-2 QSNN whose Hamiltonian and jump rates depend on a scalar condition."""
+    """4-4-2 QSNN whose Hamiltonian and jump rates depend on a condition vector."""
 
-    def __init__(self, *args, coherent_backend: str = "exact", **kwargs):
+    def __init__(self, *args, coherent_backend: str = "exact", condition_dim: int = 1, **kwargs):
         super().__init__(*args, **kwargs)
+        if condition_dim <= 0:
+            raise ValueError("condition_dim must be positive")
         if coherent_backend != "exact":
             raise ValueError("conditional QSNN currently supports coherent_backend='exact'")
         self.coherent_backend = coherent_backend
-        self.h_condition = nn.Parameter(torch.zeros_like(self.h_raw))
-        self.ih_rate_condition = nn.Parameter(torch.zeros_like(self.ih_rate_raw))
-        self.ho_rate_condition = nn.Parameter(torch.zeros_like(self.ho_rate_raw))
+        self.condition_dim = int(condition_dim)
+        if self.condition_dim == 1:
+            self.h_condition = nn.Parameter(torch.zeros_like(self.h_raw))
+            self.ih_rate_condition = nn.Parameter(torch.zeros_like(self.ih_rate_raw))
+            self.ho_rate_condition = nn.Parameter(torch.zeros_like(self.ho_rate_raw))
+        else:
+            self.h_condition = nn.Parameter(
+                torch.zeros(*self.h_raw.shape, self.condition_dim, dtype=self.h_raw.dtype)
+            )
+            self.ih_rate_condition = nn.Parameter(
+                torch.zeros(*self.ih_rate_raw.shape, self.condition_dim, dtype=self.h_raw.dtype)
+            )
+            self.ho_rate_condition = nn.Parameter(
+                torch.zeros(*self.ho_rate_raw.shape, self.condition_dim, dtype=self.h_raw.dtype)
+            )
 
     def _conditions(self, conditions: torch.Tensor) -> torch.Tensor:
         values = torch.as_tensor(
             conditions,
             device=self.h_raw.device,
             dtype=self.h_raw.dtype,
-        ).reshape(-1)
-        if not bool(((values >= 0) & (values <= 1)).all()):
-            raise ValueError("conditions must lie in [0, 1]")
-        return 2.0 * values - 1.0
+        )
+        if self.condition_dim == 1:
+            values = values.reshape(-1, 1)
+            if not bool(((values >= 0) & (values <= 1)).all()):
+                raise ValueError("scalar conditions must lie in [0, 1]")
+            return 2.0 * values - 1.0
+        if values.dim() == 1:
+            values = values.unsqueeze(0)
+        if values.dim() != 2 or values.shape[-1] != self.condition_dim:
+            raise ValueError(f"conditions must have shape (batch, {self.condition_dim})")
+        if not bool(((values[:, 0] >= 0) & (values[:, 0] <= 1)).all()):
+            raise ValueError("the first condition component must lie in [0, 1]")
+        if not bool(((values[:, 1:] >= -1) & (values[:, 1:] <= 1)).all()):
+            raise ValueError("remaining condition components must lie in [-1, 1]")
+        normalized = values.clone()
+        normalized[:, 0] = 2.0 * normalized[:, 0] - 1.0
+        return normalized
 
     def conditional_hamiltonian(self, normalized: torch.Tensor) -> torch.Tensor:
-        weights = self.h_raw.unsqueeze(0) + normalized[:, None] * self.h_condition.unsqueeze(0)
+        if self.condition_dim == 1:
+            weights = self.h_raw.unsqueeze(0) + normalized * self.h_condition.unsqueeze(0)
+        else:
+            weights = self.h_raw.unsqueeze(0) + torch.einsum(
+                "bc,ec->be", normalized, self.h_condition
+            )
         batch = normalized.shape[0]
         h = torch.zeros(
             batch,
@@ -305,14 +337,14 @@ class ConditionalLayeredQSNNDiscriminator(LayeredQSNNDiscriminator):
         return h.to(self.complex_dtype)
 
     def conditional_rates(self, normalized: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        ih = F.softplus(
-            self.ih_rate_raw.unsqueeze(0)
-            + normalized[:, None, None] * self.ih_rate_condition.unsqueeze(0)
-        ) + 1e-7
-        ho = F.softplus(
-            self.ho_rate_raw.unsqueeze(0)
-            + normalized[:, None, None] * self.ho_rate_condition.unsqueeze(0)
-        ) + 1e-7
+        if self.condition_dim == 1:
+            ih_delta = normalized[:, :, None] * self.ih_rate_condition.unsqueeze(0)
+            ho_delta = normalized[:, :, None] * self.ho_rate_condition.unsqueeze(0)
+        else:
+            ih_delta = torch.einsum("bc,hic->bhi", normalized, self.ih_rate_condition)
+            ho_delta = torch.einsum("bc,ohc->boh", normalized, self.ho_rate_condition)
+        ih = F.softplus(self.ih_rate_raw.unsqueeze(0) + ih_delta) + 1e-7
+        ho = F.softplus(self.ho_rate_raw.unsqueeze(0) + ho_delta) + 1e-7
         return ih, ho
 
     def forward(self, rho: torch.Tensor, conditions: torch.Tensor) -> dict[str, torch.Tensor]:
@@ -320,7 +352,7 @@ class ConditionalLayeredQSNNDiscriminator(LayeredQSNNDiscriminator):
         rho_batch = rho.unsqueeze(0) if squeeze else rho
         normalized = self._conditions(conditions)
         if normalized.shape[0] == 1 and rho_batch.shape[0] > 1:
-            normalized = normalized.expand(rho_batch.shape[0])
+            normalized = normalized.expand(rho_batch.shape[0], -1)
         if normalized.shape[0] != rho_batch.shape[0]:
             raise ValueError("condition batch size must match density-matrix batch size")
         embedded = self.embed_input(rho_batch)
@@ -352,30 +384,64 @@ class ConditionalLayeredQSNNDiscriminator(LayeredQSNNDiscriminator):
 class ConditionalAncillaVQCDiscriminator(AncillaVQCDiscriminator):
     """Ancilla-VQC baseline with the same affine condition re-uploading."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, condition_dim: int = 1, **kwargs):
         super().__init__(*args, **kwargs)
-        self.ry_condition = nn.Parameter(torch.zeros_like(self.ry_angles))
-        self.rz_condition = nn.Parameter(torch.zeros_like(self.rz_angles))
+        if condition_dim <= 0:
+            raise ValueError("condition_dim must be positive")
+        self.condition_dim = int(condition_dim)
+        if self.condition_dim == 1:
+            self.ry_condition = nn.Parameter(torch.zeros_like(self.ry_angles))
+            self.rz_condition = nn.Parameter(torch.zeros_like(self.rz_angles))
+        else:
+            self.ry_condition = nn.Parameter(
+                torch.zeros(*self.ry_angles.shape, self.condition_dim, dtype=self.ry_angles.dtype)
+            )
+            self.rz_condition = nn.Parameter(
+                torch.zeros(*self.rz_angles.shape, self.condition_dim, dtype=self.rz_angles.dtype)
+            )
 
     def _conditions(self, conditions: torch.Tensor) -> torch.Tensor:
         values = torch.as_tensor(
             conditions,
             device=self.ry_angles.device,
             dtype=self.ry_angles.dtype,
-        ).reshape(-1)
-        if not bool(((values >= 0) & (values <= 1)).all()):
-            raise ValueError("conditions must lie in [0, 1]")
-        return 2.0 * values - 1.0
+        )
+        if self.condition_dim == 1:
+            values = values.reshape(-1, 1)
+            if not bool(((values >= 0) & (values <= 1)).all()):
+                raise ValueError("scalar conditions must lie in [0, 1]")
+            return 2.0 * values - 1.0
+        if values.dim() == 1:
+            values = values.unsqueeze(0)
+        if values.dim() != 2 or values.shape[-1] != self.condition_dim:
+            raise ValueError(f"conditions must have shape (batch, {self.condition_dim})")
+        if not bool(((values[:, 0] >= 0) & (values[:, 0] <= 1)).all()):
+            raise ValueError("the first condition component must lie in [0, 1]")
+        if not bool(((values[:, 1:] >= -1) & (values[:, 1:] <= 1)).all()):
+            raise ValueError("remaining condition components must lie in [-1, 1]")
+        normalized = values.clone()
+        normalized[:, 0] = 2.0 * normalized[:, 0] - 1.0
+        return normalized
 
     def conditional_unitary(self, normalized: torch.Tensor) -> torch.Tensor:
         batch = normalized.shape[0]
         unitary = torch.eye(
             self.total_dim, dtype=self.complex_dtype, device=self.ry_angles.device
         ).expand(batch, -1, -1).clone()
+        if self.condition_dim == 1:
+            ry_angles = self.ry_angles.unsqueeze(0) + normalized[:, :, None] * self.ry_condition.unsqueeze(0)
+            rz_angles = self.rz_angles.unsqueeze(0) + normalized[:, :, None] * self.rz_condition.unsqueeze(0)
+        else:
+            ry_angles = self.ry_angles.unsqueeze(0) + torch.einsum(
+                "bc,lqc->blq", normalized, self.ry_condition
+            )
+            rz_angles = self.rz_angles.unsqueeze(0) + torch.einsum(
+                "bc,lqc->blq", normalized, self.rz_condition
+            )
         for layer in range(self.n_layers):
             for qubit in range(self.n_qubits):
-                ry_angle = self.ry_angles[layer, qubit] + normalized * self.ry_condition[layer, qubit]
-                rz_angle = self.rz_angles[layer, qubit] + normalized * self.rz_condition[layer, qubit]
+                ry_angle = ry_angles[:, layer, qubit]
+                rz_angle = rz_angles[:, layer, qubit]
                 ry = _batched_full_single_qubit_gate(
                     _ry(ry_angle, self.complex_dtype), qubit, self.n_qubits
                 )
@@ -396,7 +462,7 @@ class ConditionalAncillaVQCDiscriminator(AncillaVQCDiscriminator):
         rho_batch = rho.unsqueeze(0) if squeeze else rho
         normalized = self._conditions(conditions)
         if normalized.shape[0] == 1 and rho_batch.shape[0] > 1:
-            normalized = normalized.expand(rho_batch.shape[0])
+            normalized = normalized.expand(rho_batch.shape[0], -1)
         if normalized.shape[0] != rho_batch.shape[0]:
             raise ValueError("condition batch size must match density-matrix batch size")
         embedded = self.embed_input(rho_batch)

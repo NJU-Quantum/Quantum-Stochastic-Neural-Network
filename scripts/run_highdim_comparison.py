@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import signal
 import subprocess
 import sys
 import time
@@ -81,6 +83,31 @@ def timestamp() -> str:
 
 def write_status(path: Path, state: dict) -> None:
     path.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def make_hangup_handler(log_root: Path):
+    """On terminal hangup, detach output to logs/runner.log and keep running."""
+
+    def handler(signum, frame):
+        log_root.mkdir(parents=True, exist_ok=True)
+        fd = os.open(str(log_root / "runner.log"), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
+        os.dup2(fd, 1)
+        os.dup2(fd, 2)
+        os.close(fd)
+        print(f"[{timestamp()}] SIGHUP received; runner detached, output continues in runner.log", flush=True)
+
+    return handler
+
+
+def raise_on_signal(signum, frame):
+    raise SystemExit(128 + signum)
+
+
+def install_signal_handlers(log_root: Path) -> None:
+    if os.name != "posix":
+        return
+    signal.signal(signal.SIGHUP, make_hangup_handler(log_root))
+    signal.signal(signal.SIGTERM, raise_on_signal)
 
 
 def validate_args(args) -> None:
@@ -211,57 +238,72 @@ def run_pool(
 
     pending = list(tasks)
     active: dict[str, tuple[Task, subprocess.Popen, object]] = {}
-    while pending or active:
-        for device in devices:
-            if not pending or device in active:
-                continue
-            task = pending.pop(0)
-            task.log_path.parent.mkdir(parents=True, exist_ok=True)
-            log = task.log_path.open("w", encoding="utf-8")
-            command = [*task.command, "--device", device]
-            process = subprocess.Popen(
-                command,
-                cwd=ROOT,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                text=True,
-            )
-            active[device] = (task, process, log)
-            status["tasks"][task.name] = {
-                "status": "running",
-                "device": device,
-                "pid": process.pid,
-                "started_at": timestamp(),
-                "log": str(task.log_path),
-                "command": command,
-            }
-            write_status(status_path, status)
-
-        failed = None
-        for device, (task, process, log) in list(active.items()):
-            return_code = process.poll()
-            if return_code is None:
-                continue
-            log.close()
-            del active[device]
-            status["tasks"][task.name].update(
-                {
-                    "status": "completed" if return_code == 0 else "failed",
-                    "return_code": return_code,
-                    "finished_at": timestamp(),
+    child_env = {**os.environ, "PYTHONUNBUFFERED": "1"}
+    try:
+        while pending or active:
+            for device in devices:
+                if not pending or device in active:
+                    continue
+                task = pending.pop(0)
+                task.log_path.parent.mkdir(parents=True, exist_ok=True)
+                log = task.log_path.open("w", encoding="utf-8")
+                command = [*task.command, "--device", device]
+                process = subprocess.Popen(
+                    command,
+                    cwd=ROOT,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    env=child_env,
+                    start_new_session=os.name == "posix",
+                )
+                active[device] = (task, process, log)
+                status["tasks"][task.name] = {
+                    "status": "running",
+                    "device": device,
+                    "pid": process.pid,
+                    "started_at": timestamp(),
+                    "log": str(task.log_path),
+                    "command": command,
                 }
-            )
-            write_status(status_path, status)
-            if return_code != 0:
-                failed = (task, return_code)
-                break
-        if failed is not None:
-            for _device, (_task, process, log) in active.items():
-                process.terminate()
+                write_status(status_path, status)
+
+            failed = None
+            for device, (task, process, log) in list(active.items()):
+                return_code = process.poll()
+                if return_code is None:
+                    continue
                 log.close()
-            raise subprocess.CalledProcessError(failed[1], failed[0].command)
-        if pending or active:
-            time.sleep(1.0)
+                del active[device]
+                status["tasks"][task.name].update(
+                    {
+                        "status": "completed" if return_code == 0 else "failed",
+                        "return_code": return_code,
+                        "finished_at": timestamp(),
+                    }
+                )
+                write_status(status_path, status)
+                if return_code != 0:
+                    failed = (task, return_code)
+                    break
+            if failed is not None:
+                raise subprocess.CalledProcessError(failed[1], failed[0].command)
+            if pending or active:
+                time.sleep(1.0)
+    except BaseException:
+        for _device, (task, process, log) in active.items():
+            process.terminate()
+            status["tasks"][task.name].update(
+                {"status": "terminated", "finished_at": timestamp()}
+            )
+        for _device, (task, process, log) in active.items():
+            try:
+                process.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                process.kill()
+            log.close()
+        write_status(status_path, status)
+        raise
 
 
 def summarize(output_root: Path, dimensions: list[int]) -> None:
@@ -297,6 +339,8 @@ def main():
         }
     log_root = output_root / "logs"
     output_root.mkdir(parents=True, exist_ok=True)
+    log_root.mkdir(parents=True, exist_ok=True)
+    install_signal_handlers(log_root)
     status_path = output_root / "runner_status.json"
     status = {
         "status": "running",
@@ -334,10 +378,11 @@ def main():
         )
         if not args.dry_run:
             summarize(output_root, args.dimensions)
-    except Exception as error:
+    except BaseException as error:
+        interrupted = isinstance(error, (KeyboardInterrupt, SystemExit))
         status.update(
             {
-                "status": "failed",
+                "status": "interrupted" if interrupted else "failed",
                 "failed_at": timestamp(),
                 "error": f"{type(error).__name__}: {error}",
             }
